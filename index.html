@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YIAPS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #111827; color: #f3f4f6; }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                YouTube Insight System
+            </h1>
+            <p class="text-gray-400 text-sm mt-1">Automated Forecasting Dashboard</p>
+        </header>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Card 1 -->
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <h3 class="text-gray-400 text-sm">30D Views</h3>
+                <p id="totalViews" class="text-2xl font-bold mt-2">-</p>
+                <span id="viewsGrowth" class="text-xs px-2 py-1 rounded bg-gray-900 mt-2 inline-block">-</span>
+            </div>
+            <!-- Card 2 -->
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <h3 class="text-gray-400 text-sm">Est. Revenue</h3>
+                <p id="revenue" class="text-2xl font-bold mt-2 text-green-400">-</p>
+            </div>
+            <!-- Card 3 -->
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <h3 class="text-gray-400 text-sm">Subs Gained</h3>
+                <p id="subs" class="text-2xl font-bold mt-2 text-blue-400">-</p>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-lg">
+            <h3 class="text-lg font-semibold mb-4">Views Forecast (AI Prediction)</h3>
+            <canvas id="growthChart"></canvas>
+        </div>
+        
+        <footer class="mt-8 text-center text-gray-600 text-xs">
+            Last Updated: <span id="lastUpdated">-</span>
+        </footer>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch('dashboard_data.json');
+                const data = await response.json();
+                
+                // Update Metrics
+                document.getElementById('totalViews').innerText = data.summary.total_views_30d.toLocaleString();
+                document.getElementById('revenue').innerText = '$' + data.summary.estimated_revenue_30d;
+                document.getElementById('subs').innerText = '+' + data.summary.subs_gained_30d;
+                document.getElementById('lastUpdated').innerText = data.summary.last_updated;
+
+                const growthEl = document.getElementById('viewsGrowth');
+                const growth = data.summary.views_growth;
+                growthEl.innerText = (growth >= 0 ? '▲ ' : '▼ ') + Math.abs(growth) + '%';
+                growthEl.classList.add(growth >= 0 ? 'text-green-400' : 'text-red-400');
+
+                // Chart
+                const ctx = document.getElementById('growthChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.chart_data.labels,
+                        datasets: [
+                            {
+                                label: 'Historical Views',
+                                data: data.chart_data.historical,
+                                borderColor: '#8b5cf6',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'AI Prediction',
+                                data: data.chart_data.predicted,
+                                borderColor: '#ec4899',
+                                borderDash: [5, 5],
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: '#9ca3af' } }
+                        },
+                        scales: {
+                            y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+                            x: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error loading dashboard data:", error);
+            }
+        }
+        
+        loadDashboard();
+    </script>
+</body>
+</html>

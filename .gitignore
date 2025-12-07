@@ -1,0 +1,9 @@
+client_secret_*.json
+credentials.json
+.env
+__pycache__/
+.DS_Store
+venv/
+*.csv
+.ipynb_checkpoints/
+data/

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  yiaps:
+    build: .
+    image: yiaps:latest
+    container_name: youtube_insight_system
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /Users/a1234/.ssh:/root/.ssh:ro # For Git Push (Optional)
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Keep container running for exec or cron usage if needed, or run once.
+    # For initial auth, we run specifically instructions.
+    command: python fetch_data.py
