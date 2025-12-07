@@ -18,7 +18,7 @@ echo "[$DATE] Running YIAPS in Docker..." >> "$LOG_FILE"
 
 # Git Sync
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
-git add data/*.csv dashboard_data.json index.html
+git add data/*.csv dashboard_data.json dashboard_data.js index.html
 git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
 git push origin main >> "$LOG_FILE" 2>&1
 
