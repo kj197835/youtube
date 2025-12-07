@@ -1,112 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YIAPS Dashboard</title>
+    <title>YIAPS Advanced Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #111827; color: #f3f4f6; }
+        body {
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+            color: #9ca3af;
+        }
+
+        .tab-btn:hover {
+            color: #e5e7eb;
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #8b5cf6;
+            color: #8b5cf6;
+        }
     </style>
 </head>
-<body class="p-6">
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-                YouTube Insight System
-            </h1>
-            <p class="text-gray-400 text-sm mt-1">Automated Forecasting Dashboard</p>
+
+<body class="min-h-screen flex flex-col p-6">
+    <div class="max-w-6xl mx-auto w-full">
+        <!-- Global Header -->
+        <header class="mb-6 flex justify-between items-end border-b border-gray-800 pb-4">
+            <div>
+                <h1
+                    class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                    YouTube Insight System
+                </h1>
+                <p class="text-gray-400 text-sm mt-1">Automated Analysis Dashboard</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">Last Updated</p>
+                <p id="lastUpdated" class="text-sm text-gray-300 font-mono">-</p>
+            </div>
         </header>
 
-        <!-- Metrics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Card 1 -->
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                <h3 class="text-gray-400 text-sm">30D Views</h3>
-                <p id="totalViews" class="text-2xl font-bold mt-2">-</p>
-                <span id="viewsGrowth" class="text-xs px-2 py-1 rounded bg-gray-900 mt-2 inline-block">-</span>
+        <!-- Navigation Tabs (Moved Below Header) -->
+        <nav class="mb-8 border-b border-gray-700">
+            <div class="flex space-x-8">
+                <button onclick="switchTab('history')" id="tab-history"
+                    class="tab-btn active pb-4 font-bold text-sm uppercase tracking-wide transition focus:outline-none">
+                    History
+                </button>
+                <button onclick="switchTab('prediction')" id="tab-prediction"
+                    class="tab-btn pb-4 font-bold text-sm uppercase tracking-wide transition focus:outline-none">
+                    Prediction
+                </button>
+                <button onclick="switchTab('content')" id="tab-content"
+                    class="tab-btn pb-4 font-bold text-sm uppercase tracking-wide transition focus:outline-none">
+                    Content
+                </button>
             </div>
-            <!-- Card 2 -->
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                <h3 class="text-gray-400 text-sm">Est. Revenue</h3>
-                <p id="revenue" class="text-2xl font-bold mt-2 text-green-400">-</p>
+        </nav>
+
+        <!-- VIEW: HISTORY -->
+        <div id="content-history" class="tab-content block animate-fade-in">
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div
+                    class="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-purple-500 transition shadow-lg">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">30D Views</h3>
+                    <p id="totalViews" class="text-3xl font-bold mt-2 text-white">-</p>
+                </div>
+                <div
+                    class="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-green-500 transition shadow-lg">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Est. Revenue (30D)</h3>
+                    <p id="revenue" class="text-3xl font-bold mt-2 text-green-400">-</p>
+                </div>
+                <div
+                    class="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-blue-500 transition shadow-lg">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Subs Gained (30D)</h3>
+                    <p id="subs" class="text-3xl font-bold mt-2 text-blue-400">-</p>
+                </div>
             </div>
-            <!-- Card 3 -->
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                <h3 class="text-gray-400 text-sm">Subs Gained</h3>
-                <p id="subs" class="text-2xl font-bold mt-2 text-blue-400">-</p>
+
+            <!-- History Chart -->
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold text-gray-200">Channel Performance</h3>
+                    <div class="flex bg-gray-700 rounded-lg p-1 text-xs">
+                        <button onclick="updateHistoryChart('daily')" id="btn-daily"
+                            class="time-btn active px-3 py-1 rounded-md text-gray-300 hover:text-white hover:bg-gray-600 transition">Daily</button>
+                        <button onclick="updateHistoryChart('weekly')" id="btn-weekly"
+                            class="time-btn px-3 py-1 rounded-md text-gray-300 hover:text-white hover:bg-gray-600 transition">Weekly</button>
+                        <button onclick="updateHistoryChart('monthly')" id="btn-monthly"
+                            class="time-btn px-3 py-1 rounded-md text-gray-300 hover:text-white hover:bg-gray-600 transition">Monthly</button>
+                    </div>
+                </div>
+                <div class="w-full h-96">
+                    <canvas id="historyChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- Chart -->
-        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-lg">
-            <h3 class="text-lg font-semibold mb-4">Views Forecast (AI Prediction)</h3>
-            <canvas id="growthChart"></canvas>
+        <!-- VIEW: PREDICTION -->
+        <div id="content-prediction" class="tab-content hidden animate-fade-in">
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-xl">
+                <div class="border-b border-gray-700 pb-4 mb-6">
+                    <h3 class="text-xl font-bold text-pink-500">AI Views Forecast</h3>
+                    <p class="text-gray-400 text-sm mt-1">
+                        Predicted performance for the next 7 days based on recent linear growth trends.
+                    </p>
+                </div>
+                <div class="w-full h-96">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </div>
         </div>
-        
-        <footer class="mt-8 text-center text-gray-600 text-xs">
-            Last Updated: <span id="lastUpdated">-</span>
-        </footer>
+
+        <!-- VIEW: CONTENT -->
+        <div id="content-content" class="tab-content hidden animate-fade-in">
+            <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-xl">
+                <div class="p-6 border-b border-gray-700 bg-gray-800">
+                    <h3 class="text-xl font-bold text-white">Top Performing Videos</h3>
+                    <p class="text-gray-400 text-sm mt-1">Based on engagement and revenue from the last 90 days.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="bg-gray-900 text-gray-300 uppercase font-bold text-xs">
+                            <tr>
+                                <th class="px-6 py-4">Video ID / Title</th>
+                                <th class="px-6 py-4 text-right">Views</th>
+                                <th class="px-6 py-4 text-right">Mins Watched</th>
+                                <th class="px-6 py-4 text-right">New Subs</th>
+                                <th class="px-6 py-4 text-right">Est. Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="videoTableBody" class="divide-y divide-gray-700">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        let globalData = null;
+        let historyChart = null;
+        let predictionChart = null;
+
+        // -- Navigation --
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // -- Timeframe Selection Style --
+        function updateHistoryChart(timeframe) {
+            // Update Buttons
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.classList.remove('bg-gray-600', 'text-white', 'shadow');
+                if (btn.id === `btn-${timeframe}`) {
+                    btn.classList.add('bg-gray-600', 'text-white', 'shadow');
+                }
+            });
+            renderHistoryChart(timeframe);
+        }
+
+        // -- Load Data --
         async function loadDashboard() {
             try {
                 const response = await fetch('dashboard_data.json');
-                const data = await response.json();
-                
-                // Update Metrics
-                document.getElementById('totalViews').innerText = data.summary.total_views_30d.toLocaleString();
-                document.getElementById('revenue').innerText = '$' + data.summary.estimated_revenue_30d;
-                document.getElementById('subs').innerText = '+' + data.summary.subs_gained_30d;
-                document.getElementById('lastUpdated').innerText = data.summary.last_updated;
+                globalData = await response.json();
 
-                const growthEl = document.getElementById('viewsGrowth');
-                const growth = data.summary.views_growth;
-                growthEl.innerText = (growth >= 0 ? '▲ ' : '▼ ') + Math.abs(growth) + '%';
-                growthEl.classList.add(growth >= 0 ? 'text-green-400' : 'text-red-400');
+                // Update Header Stats
+                document.getElementById('totalViews').innerText = globalData.summary.total_views_30d.toLocaleString();
+                document.getElementById('revenue').innerText = '$' + globalData.summary.estimated_revenue_30d;
+                document.getElementById('subs').innerText = '+' + globalData.summary.subs_gained_30d;
+                document.getElementById('lastUpdated').innerText = globalData.summary.last_updated;
 
-                // Chart
-                const ctx = document.getElementById('growthChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.chart_data.labels,
-                        datasets: [
-                            {
-                                label: 'Historical Views',
-                                data: data.chart_data.historical,
-                                borderColor: '#8b5cf6',
-                                tension: 0.4
-                            },
-                            {
-                                label: 'AI Prediction',
-                                data: data.chart_data.predicted,
-                                borderColor: '#ec4899',
-                                borderDash: [5, 5],
-                                tension: 0.4
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { labels: { color: '#9ca3af' } }
-                        },
-                        scales: {
-                            y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
-                            x: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
-                        }
-                    }
-                });
+                // Init Views
+                updateHistoryChart('daily');
+                renderPredictionChart();
+                renderContentTable();
 
             } catch (error) {
                 console.error("Error loading dashboard data:", error);
             }
         }
-        
+
+        function renderHistoryChart(timeframe) {
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            const data = globalData.trends[timeframe];
+
+            if (historyChart) historyChart.destroy();
+
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [
+                        {
+                            label: 'Views (조회수)',
+                            data: data.views,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: timeframe === 'daily' ? 1 : 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'New Subscribers (구독자 증가)',
+                            data: data.subscribers,
+                            type: 'bar',
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            yAxisID: 'y1',
+                            barThickness: timeframe === 'daily' ? 4 : 10
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#e5e7eb', font: { size: 12 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { color: '#374151' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#3b82f6' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', maxTicksLimit: 10 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPredictionChart() {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            const data = globalData.prediction;
+
+            if (predictionChart) predictionChart.destroy();
+
+            predictionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Predicted Views (예상 조회수)',
+                        data: data.views,
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#111827',
+                        pointBorderColor: '#ec4899',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#e5e7eb', font: { size: 12 } }
+                        }
+                    },
+                    scales: {
+                        y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+
+        function renderContentTable() {
+            const tbody = document.getElementById('videoTableBody');
+            const videos = globalData.top_videos || [];
+
+            if (videos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No video data available yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = videos.map((video, index) => `
+                <tr class="hover:bg-gray-750 transition group">
+                    <td class="px-6 py-4 font-medium text-gray-300 group-hover:text-white truncate max-w-xs">
+                        <span class="text-gray-500 mr-2">#${index + 1}</span> ${video.video}
+                    </td>
+                    <td class="px-6 py-4 text-right font-mono text-gray-300">${parseInt(video.views).toLocaleString()}</td>
+                    <td class="px-6 py-4 text-right font-mono text-gray-400">${Math.round(video.estimatedMinutesWatched).toLocaleString()}</td>
+                    <td class="px-6 py-4 text-right font-mono text-blue-400">+${parseInt(video.subscribersGained)}</td>
+                    <td class="px-6 py-4 text-right font-mono text-green-400">$${parseFloat(video.estimatedRevenue).toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize with default state
+        updateHistoryChart('daily');
         loadDashboard();
     </script>
 </body>
+
 </html>

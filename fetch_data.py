@@ -30,7 +30,7 @@ def get_credentials():
             flow = InstalledAppFlow.from_client_secrets_file(
                 config.CLIENT_SECRET_FILE, config.SCOPES)
             # Use fixed port 8080 to allow Docker port mapping
-            creds = flow.run_local_server(port=8080, open_browser=False, bind_addr='0.0.0.0')
+            creds = flow.run_local_server(port=8080, open_browser=False, bind_addr='0.0.0.0', prompt='consent')
             print(f"Please visit the URL above to authorize this application.")
         
         with open(config.TOKEN_FILE, 'w') as token:
@@ -62,22 +62,89 @@ def fetch_channel_stats(youtube):
 def fetch_analytics(analytics):
     print("Fetching analytics data (last 30 days)...")
     end_date = datetime.date.today().strftime("%Y-%m-%d")
-    start_date = (datetime.date.today() - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
+    end_date = datetime.date.today().strftime("%Y-%m-%d")
+    # Fetch 1 year of data for better trending
+    start_date = (datetime.date.today() - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
     
-    request = analytics.reports().query(
-        ids="channel==MINE",
-        startDate=start_date,
-        endDate=end_date,
-        metrics="views,estimatedMinutesWatched,estimatedRevenue,subscribersGained",
-        dimensions="day",
-        sort="day"
-    )
-    response = request.execute()
+    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained"
+    
+    try:
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics=metrics_list,
+            dimensions="day",
+            sort="day"
+        )
+        response = request.execute()
+    except Exception as e:
+        print(f"Error checking revenue (channel might not be monetized): {e}")
+        print("Retrying without revenue metric...")
+        metrics_list = "views,estimatedMinutesWatched,subscribersGained"
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics=metrics_list,
+            dimensions="day",
+            sort="day"
+        )
+        response = request.execute()
     
     headers = [header["name"] for header in response.get("columnHeaders", [])]
     rows = response.get("rows", [])
     
     df = pd.DataFrame(rows, columns=headers)
+    
+    # Ensure estimatedRevenue column exists even if we fell back
+    if 'estimatedRevenue' not in df.columns:
+        df['estimatedRevenue'] = 0.0
+        
+    return df
+
+def fetch_top_videos(analytics):
+    print("Fetching top videos (last 90 days)...")
+    end_date = datetime.date.today().strftime("%Y-%m-%d")
+    # For top videos, 90 days is a good window for "recent popular"
+    start_date = (datetime.date.today() - datetime.timedelta(days=90)).strftime("%Y-%m-%d")
+    
+    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained"
+    
+    try:
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics=metrics_list,
+            dimensions="video",
+            sort="-views",
+            maxResults=10
+        )
+        response = request.execute()
+    except Exception as e:
+        print(f"Error checking revenue for top videos: {e}")
+        print("Retrying without revenue metric...")
+        metrics_list = "views,estimatedMinutesWatched,subscribersGained"
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics=metrics_list,
+            dimensions="video",
+            sort="-views",
+            maxResults=10
+        )
+        response = request.execute()
+        
+    headers = [header["name"] for header in response.get("columnHeaders", [])]
+    rows = response.get("rows", [])
+    
+    df = pd.DataFrame(rows, columns=headers)
+    
+    if 'estimatedRevenue' not in df.columns:
+        df['estimatedRevenue'] = 0.0
+        
     return df
 
 def main():
@@ -89,6 +156,7 @@ def main():
         # Fetch Data
         channel_stats = fetch_channel_stats(youtube)
         analytics_df = fetch_analytics(analytics)
+        top_videos_df = fetch_top_videos(analytics)
         
         # Add Channel Stats to DataFrame (as constant columns or metadata, but for CSV structure simply saving analytics is better)
         # We will save channel stats separately or just rely on analytics for trends.
@@ -109,6 +177,12 @@ def main():
         # Or we could load existing and merge. 
         # For now, let's overwrite to ensure clean data for the dashboard.
         analytics_df.to_csv(output_file, index=False)
+        
+        # Save Top Videos
+        top_videos_file = config.TOP_VIDEOS_FILE
+        print(f"Saving top videos to {top_videos_file}...")
+        top_videos_df.to_csv(top_videos_file, index=False)
+        
         print("Done.")
         
     except Exception as e:
