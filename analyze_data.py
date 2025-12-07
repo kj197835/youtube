@@ -114,8 +114,14 @@ def main():
     # Save JSON
     with open(config.DASHBOARD_DATA_FILE, 'w') as f:
         json.dump(dashboard_data, f, indent=4)
-    
     print(f"Dashboard data saved to {config.DASHBOARD_DATA_FILE}")
+
+    # Save JS (for local file:// access support)
+    js_content = f"window.dashboardData = {json.dumps(dashboard_data, indent=4)};"
+    js_file = config.DASHBOARD_DATA_FILE.with_suffix('.js')
+    with open(js_file, 'w') as f:
+        f.write(js_content)
+    print(f"Dashboard data JS saved to {js_file}")
 
 if __name__ == "__main__":
     main()

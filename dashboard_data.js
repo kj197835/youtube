@@ -1,4 +1,4 @@
-{
+window.dashboardData = {
     "summary": {
         "total_views_30d": 50,
         "estimated_revenue_30d": 0.0,
@@ -1789,4 +1789,4 @@
             "estimatedRevenue": 0.0
         }
     ]
-}
+};

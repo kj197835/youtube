@@ -146,6 +146,7 @@
         </div>
     </div>
 
+    <script src="dashboard_data.js"></script>
     <script>
         let globalData = null;
         let historyChart = null;
@@ -175,8 +176,14 @@
         // -- Load Data --
         async function loadDashboard() {
             try {
-                const response = await fetch('dashboard_data.json');
-                globalData = await response.json();
+                // Try to use the globally loaded data from dashboard_data.js (works with file://)
+                if (window.dashboardData) {
+                    globalData = window.dashboardData;
+                } else {
+                    // Fallback to fetch for web server environments if JS failed or not present
+                    const response = await fetch('dashboard_data.json');
+                    globalData = await response.json();
+                }
 
                 // Update Header Stats
                 document.getElementById('totalViews').innerText = globalData.summary.total_views_30d.toLocaleString();
