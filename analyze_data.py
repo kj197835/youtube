@@ -3,7 +3,11 @@ import json
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import config
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# KST Timezone helper
+def get_kst_now():
+    return datetime.now(timezone.utc) + timedelta(hours=9)
 
 def load_data():
     if not config.STATS_FILE.exists():
@@ -82,7 +86,7 @@ def main():
             "total_views_30d": int(total_views_30d),
             "estimated_revenue_30d": round(float(total_revenue_30d), 2),
             "subs_gained_30d": int(total_subs_30d),
-            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "last_updated": get_kst_now().strftime("%Y-%m-%d %H:%M:%S")
         },
         "trends": {
             "daily": {
