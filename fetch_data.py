@@ -167,6 +167,13 @@ def main():
             print(f"Channel: {channel_stats['channel_name']}")
             print(f"Subscribers: {channel_stats['subscribers']}")
             print(f"Total Views: {channel_stats['total_views']}")
+            
+            # Save channel stats to JSON for realtime display
+            import json
+            channel_stats_file = config.DATA_DIR / "channel_stats.json"
+            with open(channel_stats_file, 'w') as f:
+                json.dump(channel_stats, f, indent=4)
+
         
         # Save to CSV
         output_file = config.STATS_FILE
