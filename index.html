@@ -76,6 +76,11 @@
                 * Note: Daily analytics data typically has a 2-4 day delay from YouTube.
             </p>
 
+            <div class="p-6 border-b border-gray-700">
+                <h3 class="text-lg font-bold text-white mb-4">Cumulative Views Trend</h3>
+                <canvas id="performanceChart" class="max-h-96"></canvas>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-gray-400">
                     <thead class="bg-gray-900 text-gray-300 uppercase font-bold text-xs">
@@ -93,12 +98,15 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 
     <!-- Data Loader -->
     <!-- 1. Try to load JS file -->
     <script src="dashboard_data.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         function logDebug(msg) {
@@ -148,7 +156,7 @@
                 logDebug("Error rendering summary: " + e.message);
             }
 
-            // Render Table (Daily, Last 30 Items)
+            // Render Table (Daily, Last 30 Items) & Chart
             try {
                 // Changed from 'weekly' to 'daily'
                 const daily = data.trends.daily;
@@ -165,6 +173,11 @@
                 const maxItems = 30;
                 let count = 0;
 
+                // Arrays for Chart (we need chronological order for chart, so loop normally or reverse later)
+                let chartDates = [];
+                let chartViews = [];
+
+                // Loop backwards for Table (Newest Top)
                 for (let i = daily.dates.length - 1; i >= 0; i--) {
                     if (count >= maxItems) break;
 
@@ -173,6 +186,7 @@
                     const subs = daily.subscribers[i];
                     const rev = daily.revenue[i];
 
+                    // Add to table HTML
                     html += `
                         <tr class="hover:bg-gray-750">
                             <td class="px-6 py-4 font-mono text-gray-300">${date}</td>
@@ -181,11 +195,79 @@
                             <td class="px-6 py-4 text-right font-mono text-green-400">$${rev.toFixed(2)}</td>
                         </tr>
                     `;
+
+                    // Collect data for chart (Prepend to keep chronological order: Oldest -> Newest)
+                    chartDates.unshift(date);
+                    chartViews.unshift(views);
+
                     count++;
                 }
                 tbody.innerHTML = html;
+
+                // Calculate Cumulative Views
+                let cumulativeViews = [];
+                let runningTotal = 0;
+                for (let v of chartViews) {
+                    runningTotal += v;
+                    cumulativeViews.push(runningTotal);
+                }
+
+                // Render Chart
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartDates,
+                        datasets: [{
+                            label: 'Cumulative Views (30 Days)',
+                            data: cumulativeViews,
+                            borderColor: '#8b5cf6', // Violet
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2,
+                            pointHoverRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#9ca3af' }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                                titleColor: '#f3f4f6',
+                                bodyColor: '#d1d5db',
+                                borderColor: '#374151',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#6b7280', maxTicksLimit: 10 },
+                                grid: { color: '#374151' }
+                            },
+                            y: {
+                                ticks: { color: '#6b7280' },
+                                grid: { color: '#374151' },
+                                beginAtZero: true
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+
             } catch (e) {
-                logDebug("Error rendering table: " + e.message);
+                logDebug("Error rendering table/chart: " + e.message);
             }
         });
     </script>
