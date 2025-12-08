@@ -3,7 +3,7 @@ window.dashboardData = {
         "total_views_30d": 53,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 0,
-        "last_updated": "2025-12-08 13:08:06"
+        "last_updated": "2025-12-08 13:08:33"
     },
     "trends": {
         "daily": {
