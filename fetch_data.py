@@ -190,6 +190,8 @@ def main():
         # Log error to file
         with open("error.log", "a") as f:
             f.write(f"{datetime.datetime.now()}: {e}\n")
+        import sys
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
