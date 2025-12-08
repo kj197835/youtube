@@ -81,11 +81,24 @@ def main():
     top_videos = load_top_videos()
 
     # Prepare JSON structure
+    # Load Realtime Stats if available
+    channel_stats = {}
+    channel_stats_file = config.DATA_DIR / "channel_stats.json"
+    if channel_stats_file.exists():
+        with open(channel_stats_file, 'r') as f:
+            channel_stats = json.load(f)
+
+    # Use Realtime stats for Summary if available, otherwise fallback to 30d sum
+    summary_views = int(channel_stats.get('total_views', total_views_30d))
+    summary_subs = int(channel_stats.get('subscribers', total_subs_30d))
+    # Revenue is not available in realtime stats, so keep 30d sum
+    summary_revenue = round(float(total_revenue_30d), 2)
+
     dashboard_data = {
         "summary": {
-            "total_views_30d": int(total_views_30d),
-            "estimated_revenue_30d": round(float(total_revenue_30d), 2),
-            "subs_gained_30d": int(total_subs_30d),
+            "total_views_30d": summary_views,
+            "estimated_revenue_30d": summary_revenue,
+            "subs_gained_30d": summary_subs,
             "last_updated": get_kst_now().strftime("%Y-%m-%d %H:%M:%S")
         },
         "trends": {

@@ -47,28 +47,34 @@
         <!-- KPIs -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
             <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                <h3 class="text-gray-400 text-xs font-bold uppercase">30D Views</h3>
+                <h3 class="text-gray-400 text-xs font-bold uppercase">Total Channel Views</h3>
                 <p id="totalViews" class="text-3xl font-bold mt-2 text-white">-</p>
+                <p class="text-xs text-green-500 mt-1">Live Realtime (Data API)</p>
             </div>
             <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                <h3 class="text-gray-400 text-xs font-bold uppercase">Revenue (30D)</h3>
-                <p id="revenue" class="text-3xl font-bold mt-2 text-green-400">-</p>
-            </div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                <h3 class="text-gray-400 text-xs font-bold uppercase">Subs Gained</h3>
+                <h3 class="text-gray-400 text-xs font-bold uppercase">Total Subscribers</h3>
                 <p id="subs" class="text-3xl font-bold mt-2 text-blue-400">-</p>
+                <p class="text-xs text-green-500 mt-1">Live Realtime (Data API)</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <h3 class="text-gray-400 text-xs font-bold uppercase">Est. Revenue (30D)</h3>
+                <p id="revenue" class="text-3xl font-bold mt-2 text-green-400">-</p>
             </div>
         </div>
 
         <!-- Main Content -->
         <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-xl overflow-hidden">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white">Weekly Performance Data</h3>
+                <h3 class="text-lg font-bold text-white">Performance Data</h3>
                 <button onclick="window.location.reload()"
                     class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-xs text-white">
                     Reload Data
                 </button>
             </div>
+
+            <p class="px-6 py-2 text-xs text-yellow-500 bg-gray-900 border-b border-gray-700">
+                * Note: Daily analytics data typically has a 2-4 day delay from YouTube.
+            </p>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-gray-400">
@@ -142,24 +148,30 @@
                 logDebug("Error rendering summary: " + e.message);
             }
 
-            // Render Weekly Table
+            // Render Table (Daily, Last 30 Items)
             try {
-                const weekly = data.trends.weekly;
+                // Changed from 'weekly' to 'daily'
+                const daily = data.trends.daily;
                 const tbody = document.getElementById('dataTableBody');
 
-                if (!weekly || !weekly.dates || weekly.dates.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">No weekly data available in file.</td></tr>';
-                    logDebug("Weekly data block is missing or empty.");
+                if (!daily || !daily.dates || daily.dates.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">No daily data available in file.</td></tr>';
+                    logDebug("Daily data block is missing or empty.");
                     return;
                 }
 
                 let html = '';
-                // Loop: newest first
-                for (let i = weekly.dates.length - 1; i >= 0; i--) {
-                    const date = weekly.dates[i];
-                    const views = weekly.views[i];
-                    const subs = weekly.subscribers[i];
-                    const rev = weekly.revenue[i];
+                // Loop: newest first, limit to 30
+                const maxItems = 30;
+                let count = 0;
+
+                for (let i = daily.dates.length - 1; i >= 0; i--) {
+                    if (count >= maxItems) break;
+
+                    const date = daily.dates[i];
+                    const views = daily.views[i];
+                    const subs = daily.subscribers[i];
+                    const rev = daily.revenue[i];
 
                     html += `
                         <tr class="hover:bg-gray-750">
@@ -169,6 +181,7 @@
                             <td class="px-6 py-4 text-right font-mono text-green-400">$${rev.toFixed(2)}</td>
                         </tr>
                     `;
+                    count++;
                 }
                 tbody.innerHTML = html;
             } catch (e) {
