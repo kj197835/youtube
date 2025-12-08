@@ -1,14 +1,13 @@
 window.dashboardData = {
     "summary": {
-        "total_views_30d": 50,
+        "total_views_30d": 53,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 0,
-        "last_updated": "2025-12-07 13:48:28"
+        "last_updated": "2025-12-08 13:08:06"
     },
     "trends": {
         "daily": {
             "dates": [
-                "2024-12-07",
                 "2024-12-08",
                 "2024-12-09",
                 "2024-12-10",
@@ -370,7 +369,8 @@ window.dashboardData = {
                 "2025-12-01",
                 "2025-12-02",
                 "2025-12-03",
-                "2025-12-04"
+                "2025-12-04",
+                "2025-12-05"
             ],
             "views": [
                 0,
@@ -732,10 +732,10 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 39,
                 2,
-                9
+                9,
+                3
             ],
             "revenue": [
                 0.0,
@@ -1577,7 +1577,7 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                50
+                53
             ],
             "revenue": [
                 0.0,
@@ -1719,7 +1719,7 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                50
+                53
             ],
             "revenue": [
                 0.0,
@@ -1755,13 +1755,13 @@ window.dashboardData = {
     },
     "prediction": {
         "dates": [
-            "2025-12-05",
             "2025-12-06",
             "2025-12-07",
             "2025-12-08",
             "2025-12-09",
             "2025-12-10",
-            "2025-12-11"
+            "2025-12-11",
+            "2025-12-12"
         ],
         "views": [
             1,
@@ -1776,15 +1776,15 @@ window.dashboardData = {
     "top_videos": [
         {
             "video": "Wb2Dvo1rbmw",
-            "views": 29,
+            "views": 30,
             "estimatedMinutesWatched": 1,
             "subscribersGained": 0,
             "estimatedRevenue": 0.0
         },
         {
             "video": "8SgGs5tNmpk",
-            "views": 21,
-            "estimatedMinutesWatched": 20,
+            "views": 23,
+            "estimatedMinutesWatched": 23,
             "subscribersGained": 0,
             "estimatedRevenue": 0.0
         }
