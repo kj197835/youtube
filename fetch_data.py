@@ -66,7 +66,7 @@ def fetch_analytics(analytics):
     # Fetch 1 year of data for better trending
     start_date = (datetime.date.today() - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
     
-    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained"
+    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained,likes,dislikes,comments,shares,averageViewDuration"
     
     try:
         request = analytics.reports().query(
@@ -81,7 +81,7 @@ def fetch_analytics(analytics):
     except Exception as e:
         print(f"Error checking revenue (channel might not be monetized): {e}")
         print("Retrying without revenue metric...")
-        metrics_list = "views,estimatedMinutesWatched,subscribersGained"
+        metrics_list = "views,estimatedMinutesWatched,subscribersGained,likes,dislikes,comments,shares,averageViewDuration"
         request = analytics.reports().query(
             ids="channel==MINE",
             startDate=start_date,
@@ -101,6 +101,12 @@ def fetch_analytics(analytics):
     if 'estimatedRevenue' not in df.columns:
         df['estimatedRevenue'] = 0.0
         
+    df = pd.DataFrame(rows, columns=headers)
+    
+    # Ensure estimatedRevenue column exists even if we fell back
+    if 'estimatedRevenue' not in df.columns:
+        df['estimatedRevenue'] = 0.0
+        
     return df
 
 def fetch_top_videos(analytics):
@@ -109,7 +115,7 @@ def fetch_top_videos(analytics):
     # For top videos, 90 days is a good window for "recent popular"
     start_date = (datetime.date.today() - datetime.timedelta(days=90)).strftime("%Y-%m-%d")
     
-    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained"
+    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained,likes,dislikes,comments,shares"
     
     try:
         request = analytics.reports().query(
@@ -125,7 +131,7 @@ def fetch_top_videos(analytics):
     except Exception as e:
         print(f"Error checking revenue for top videos: {e}")
         print("Retrying without revenue metric...")
-        metrics_list = "views,estimatedMinutesWatched,subscribersGained"
+        metrics_list = "views,estimatedMinutesWatched,subscribersGained,likes,dislikes,comments,shares"
         request = analytics.reports().query(
             ids="channel==MINE",
             startDate=start_date,
@@ -147,6 +153,100 @@ def fetch_top_videos(analytics):
         
     return df
 
+def fetch_demographics(analytics):
+    print("Fetching demographics (last 30 days)...")
+    end_date = datetime.date.today().strftime("%Y-%m-%d")
+    start_date = (datetime.date.today() - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
+    
+    demographics = {}
+
+    # 1. Age & Gender
+    try:
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics="viewerPercentage",
+            dimensions="ageGroup,gender",
+            sort="ageGroup,gender"
+        )
+        response = request.execute()
+        demographics['age_gender'] = {
+            'headers': [h['name'] for h in response.get('columnHeaders', [])],
+            'rows': response.get('rows', [])
+        }
+    except Exception as e:
+        print(f"Error fetching age/gender: {e}")
+
+    # 2. Geography (Country)
+    try:
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics="views,estimatedMinutesWatched",
+            dimensions="country",
+            sort="-views",
+            maxResults=15
+        )
+        response = request.execute()
+        demographics['geography'] = {
+            'headers': [h['name'] for h in response.get('columnHeaders', [])],
+            'rows': response.get('rows', [])
+        }
+    except Exception as e:
+        print(f"Error fetching geography: {e}")
+        
+    return demographics
+
+def fetch_traffic_sources(analytics):
+    print("Fetching traffic sources (last 30 days)...")
+    end_date = datetime.date.today().strftime("%Y-%m-%d")
+    start_date = (datetime.date.today() - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
+    
+    try:
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics="views,estimatedMinutesWatched",
+            dimensions="insightTrafficSourceType",
+            sort="-views"
+        )
+        response = request.execute()
+        
+        headers = [header["name"] for header in response.get("columnHeaders", [])]
+        rows = response.get("rows", [])
+        return pd.DataFrame(rows, columns=headers)
+        
+    except Exception as e:
+        print(f"Error fetching traffic sources: {e}")
+        return pd.DataFrame()
+
+def fetch_interaction_stats(analytics):
+    print("Trying to fetch interaction stats (Card/EndScreen)...")
+    end_date = datetime.date.today().strftime("%Y-%m-%d")
+    start_date = (datetime.date.today() - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
+    
+    # Try fetching Card Clicks
+    try:
+        request = analytics.reports().query(
+            ids="channel==MINE",
+            startDate=start_date,
+            endDate=end_date,
+            metrics="cardClicks,cardImpressions,endScreenElementClicks,endScreenElementImpressions",
+            dimensions="day",
+            sort="day"
+        )
+        response = request.execute()
+        print("Successfully fetched interaction stats!")
+        headers = [header["name"] for header in response.get("columnHeaders", [])]
+        rows = response.get("rows", [])
+        return pd.DataFrame(rows, columns=headers)
+    except Exception as e:
+        print(f"Warning: Could not fetch interaction stats (API might not support it for this channel): {e}")
+        return pd.DataFrame()
+
 def main():
     try:
         creds = get_credentials()
@@ -155,13 +255,20 @@ def main():
         
         # Fetch Data
         channel_stats = fetch_channel_stats(youtube)
-        analytics_df = fetch_analytics(analytics)
-        top_videos_df = fetch_top_videos(analytics)
         
-        # Add Channel Stats to DataFrame (as constant columns or metadata, but for CSV structure simply saving analytics is better)
-        # We will save channel stats separately or just rely on analytics for trends.
-        # The user wants "channel stats and profit".
-        # Let's print channel stats and save analytics.
+        # Update Analytics Fetch to include AvViewDuration, CardClicks, EndScreenClicks
+        # Since we cannot easily pass arguments to the existing function without refactoring,
+        # We will modify the existing fetch_analytics function in-place (conceptually) 
+        # But here in 'main', we are calling functions.
+        # WAITING: I need to update fetch_analytics to include the extra metrics first!
+        # Re-defining fetch_analytics in the replacement chunk below for clarity.
+        
+        analytics_df = fetch_analytics(analytics) 
+        top_videos_df = fetch_top_videos(analytics)
+        demographics_data = fetch_demographics(analytics)
+        traffic_df = fetch_traffic_sources(analytics)
+        interaction_df = fetch_interaction_stats(analytics)
+        
         
         if channel_stats:
             print(f"Channel: {channel_stats['channel_name']}")
@@ -175,20 +282,34 @@ def main():
                 json.dump(channel_stats, f, indent=4)
 
         
-        # Save to CSV
+        # Merge interaction stats if available
         output_file = config.STATS_FILE
-        print(f"Saving data to {output_file}...")
         
-        # If file exists, we might want to append, but for simplicity and avoiding dupes, 
-        # overwriting with last 30 days is safer for this 'insight' window. 
-        # Or we could load existing and merge. 
-        # For now, let's overwrite to ensure clean data for the dashboard.
+        if not interaction_df.empty:
+            # Merge on 'day'
+            if 'day' in analytics_df.columns and 'day' in interaction_df.columns:
+                print("Merging interaction stats into main data...")
+                analytics_df = pd.merge(analytics_df, interaction_df, on='day', how='left')
+        
+        print(f"Saving data to {output_file}...")
         analytics_df.to_csv(output_file, index=False)
         
         # Save Top Videos
         top_videos_file = config.TOP_VIDEOS_FILE
         print(f"Saving top videos to {top_videos_file}...")
         top_videos_df.to_csv(top_videos_file, index=False)
+        
+        # Save Demographics
+        if demographics_data:
+            import json
+            print(f"Saving demographics to {config.DEMOGRAPHICS_FILE}...")
+            with open(config.DEMOGRAPHICS_FILE, 'w') as f:
+                json.dump(demographics_data, f, indent=4)
+                
+        # Save Traffic Sources
+        if not traffic_df.empty:
+            print(f"Saving traffic sources to {config.TRAFFIC_SOURCES_FILE}...")
+            traffic_df.to_csv(config.TRAFFIC_SOURCES_FILE, index=False)
         
         print("Done.")
         

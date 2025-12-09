@@ -106,19 +106,28 @@ def main():
                 "dates": daily_df['day'].tolist(),
                 "views": daily_df['views'].tolist(),
                 "revenue": daily_df['estimatedRevenue'].tolist(),
-                "subscribers": daily_df['subscribersGained'].tolist()
+                "subscribers": daily_df['subscribersGained'].tolist(),
+                "likes": daily_df['likes'].tolist(),
+                "comments": daily_df['comments'].tolist(),
+                "shares": daily_df['shares'].tolist()
             },
             "weekly": {
                 "dates": weekly_df['day'].tolist(),
                 "views": weekly_df['views'].tolist(),
                 "revenue": weekly_df['estimatedRevenue'].tolist(),
-                "subscribers": weekly_df['subscribersGained'].tolist()
+                "subscribers": weekly_df['subscribersGained'].tolist(),
+                "likes": weekly_df['likes'].tolist(),
+                "comments": weekly_df['comments'].tolist(),
+                "shares": weekly_df['shares'].tolist()
             },
             "monthly": {
                 "dates": monthly_df['day'].tolist(),
                 "views": monthly_df['views'].tolist(),
                 "revenue": monthly_df['estimatedRevenue'].tolist(),
-                "subscribers": monthly_df['subscribersGained'].tolist()
+                "subscribers": monthly_df['subscribersGained'].tolist(),
+                "likes": monthly_df['likes'].tolist(),
+                "comments": monthly_df['comments'].tolist(),
+                "shares": monthly_df['shares'].tolist()
             }
         },
         "prediction": {
