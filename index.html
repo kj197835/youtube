@@ -66,10 +66,11 @@
         <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-xl overflow-hidden">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white">Performance Data</h3>
-                <button onclick="window.location.reload()"
-                    class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-xs text-white">
-                    Reload Data
-                </button>
+                <select id="timeframeSelect"
+                    class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-xs text-white border-none outline-none cursor-pointer">
+                    <option value="daily" selected>Daily</option>
+                    <option value="weekly">Weekly</option>
+                </select>
             </div>
 
             <p class="px-6 py-2 text-xs text-yellow-500 bg-gray-900 border-b border-gray-700">
@@ -109,6 +110,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // Global variables
+        let chartInstance = null;
+        let globalData = null;
+
         function logDebug(msg) {
             const el = document.getElementById('debugParams');
             const msgEl = document.getElementById('debugMsg');
@@ -117,22 +122,17 @@
             console.log(msg);
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            let data = null;
-
+        async function initDashboard() {
             // Step 1: Check Global Variable (from JS file)
             if (window.dashboardData) {
-                // logDebug("Succesfully loaded data via dashboard_data.js");
-                data = window.dashboardData;
+                globalData = window.dashboardData;
             }
             // Step 2: Fallback to Fetch (from JSON file)
             else {
-                // logDebug("Start fetching dashboard_data.json...");
                 try {
                     const response = await fetch('dashboard_data.json');
                     if (!response.ok) throw new Error("File not found or HTTP error");
-                    data = await response.json();
-                    // logDebug("Fetch successful.");
+                    globalData = await response.json();
                 } catch (e) {
                     logDebug("CRITICAL ERROR: Could not load data source. " + e.message);
                     document.getElementById('dataTableBody').innerHTML =
@@ -141,30 +141,38 @@
                 }
             }
 
-            if (!data) {
+            if (!globalData) {
                 logDebug("Data object is null/undefined after loading attempt.");
                 return;
             }
 
-            // Render Summary
+            // Render Header Summary (Static)
             try {
-                document.getElementById('lastUpdated').innerText = data.summary.last_updated;
-                document.getElementById('totalViews').innerText = data.summary.total_views_30d.toLocaleString();
-                document.getElementById('revenue').innerText = '$' + data.summary.estimated_revenue_30d;
-                document.getElementById('subs').innerText = '+' + data.summary.subs_gained_30d;
+                document.getElementById('lastUpdated').innerText = globalData.summary.last_updated;
+                document.getElementById('totalViews').innerText = globalData.summary.total_views_30d.toLocaleString();
+                document.getElementById('revenue').innerText = '$' + globalData.summary.estimated_revenue_30d;
+                document.getElementById('subs').innerText = '+' + globalData.summary.subs_gained_30d;
             } catch (e) {
                 logDebug("Error rendering summary: " + e.message);
             }
 
-            // Render Table (Daily, Last 30 Items) & Chart
+            // Initial Render (Daily)
+            renderDashboard('daily');
+
+            // Add Event Listener
+            document.getElementById('timeframeSelect').addEventListener('change', (e) => {
+                renderDashboard(e.target.value);
+            });
+        }
+
+        function renderDashboard(timeframe) {
             try {
-                // Changed from 'weekly' to 'daily'
-                const daily = data.trends.daily;
+                // Select Data Source based on timeframe
+                const dataSet = timeframe === 'weekly' ? globalData.trends.weekly : globalData.trends.daily;
                 const tbody = document.getElementById('dataTableBody');
 
-                if (!daily || !daily.dates || daily.dates.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">No daily data available in file.</td></tr>';
-                    logDebug("Daily data block is missing or empty.");
+                if (!dataSet || !dataSet.dates || dataSet.dates.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">No data available for this timeframe.</td></tr>';
                     return;
                 }
 
@@ -173,18 +181,18 @@
                 const maxItems = 30;
                 let count = 0;
 
-                // Arrays for Chart (we need chronological order for chart, so loop normally or reverse later)
+                // Arrays for Chart
                 let chartDates = [];
                 let chartViews = [];
 
                 // Loop backwards for Table (Newest Top)
-                for (let i = daily.dates.length - 1; i >= 0; i--) {
+                for (let i = dataSet.dates.length - 1; i >= 0; i--) {
                     if (count >= maxItems) break;
 
-                    const date = daily.dates[i];
-                    const views = daily.views[i];
-                    const subs = daily.subscribers[i];
-                    const rev = daily.revenue[i];
+                    const date = dataSet.dates[i];
+                    const views = dataSet.views[i];
+                    const subs = dataSet.subscribers[i];
+                    const rev = dataSet.revenue[i];
 
                     // Add to table HTML
                     html += `
@@ -196,7 +204,7 @@
                         </tr>
                     `;
 
-                    // Collect data for chart (Prepend to keep chronological order: Oldest -> Newest)
+                    // Collect data for chart (Prepend to keep chronological order)
                     chartDates.unshift(date);
                     chartViews.unshift(views);
 
@@ -204,72 +212,79 @@
                 }
                 tbody.innerHTML = html;
 
-                // Calculate Cumulative Views
-                let cumulativeViews = [];
-                let runningTotal = 0;
-                for (let v of chartViews) {
-                    runningTotal += v;
-                    cumulativeViews.push(runningTotal);
-                }
-
                 // Render Chart
-                const ctx = document.getElementById('performanceChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: chartDates,
-                        datasets: [{
-                            label: 'Cumulative Views (30 Days)',
-                            data: cumulativeViews,
-                            borderColor: '#8b5cf6', // Violet
-                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 2,
-                            pointHoverRadius: 5
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: { color: '#9ca3af' }
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                                titleColor: '#f3f4f6',
-                                bodyColor: '#d1d5db',
-                                borderColor: '#374151',
-                                borderWidth: 1
-                            }
-                        },
-                        scales: {
-                            x: {
-                                ticks: { color: '#6b7280', maxTicksLimit: 10 },
-                                grid: { color: '#374151' }
-                            },
-                            y: {
-                                ticks: { color: '#6b7280' },
-                                grid: { color: '#374151' },
-                                beginAtZero: true
-                            }
-                        },
-                        interaction: {
-                            mode: 'nearest',
-                            axis: 'x',
-                            intersect: false
-                        }
-                    }
-                });
+                updateChart(chartDates, chartViews, timeframe);
 
             } catch (e) {
-                logDebug("Error rendering table/chart: " + e.message);
+                logDebug("Error rendering dashboard: " + e.message);
             }
-        });
+        }
+
+        function updateChart(dates, views, timeframe) {
+            // Calculate Cumulative Views
+            let cumulativeViews = [];
+            let runningTotal = 0;
+            for (let v of views) {
+                runningTotal += v;
+                cumulativeViews.push(runningTotal);
+            }
+
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: `Cumulative Views (${timeframe === 'weekly' ? 'Weekly' : 'Daily'} - Last 30)`,
+                        data: cumulativeViews,
+                        borderColor: '#8b5cf6', // Violet
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#9ca3af' } },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            titleColor: '#f3f4f6',
+                            bodyColor: '#d1d5db',
+                            borderColor: '#374151',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#6b7280', maxTicksLimit: 10 },
+                            grid: { color: '#374151' }
+                        },
+                        y: {
+                            ticks: { color: '#6b7280' },
+                            grid: { color: '#374151' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>
 
