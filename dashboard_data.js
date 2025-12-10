@@ -1,14 +1,13 @@
 window.dashboardData = {
     "summary": {
-        "total_views_30d": 114,
+        "total_views_30d": 117,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 2,
-        "last_updated": "2025-12-10 06:00:05"
+        "last_updated": "2025-12-10 15:00:05"
     },
     "trends": {
         "daily": {
             "dates": [
-                "2024-12-09",
                 "2024-12-10",
                 "2024-12-11",
                 "2024-12-12",
@@ -374,7 +373,6 @@ window.dashboardData = {
                 "2025-12-07"
             ],
             "views": [
-                0,
                 0,
                 0,
                 0,
@@ -1102,7 +1100,6 @@ window.dashboardData = {
                 0.0,
                 0.0,
                 0.0,
-                0.0,
                 0.0
             ],
             "subscribers": [
@@ -1468,11 +1465,9 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 2
             ],
             "likes": [
-                0,
                 0,
                 0,
                 0,
@@ -2195,7 +2190,6 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 1,
                 0,
                 0,
@@ -2204,7 +2198,6 @@ window.dashboardData = {
                 0
             ],
             "shares": [
-                0,
                 0,
                 0,
                 0,
@@ -2572,7 +2565,6 @@ window.dashboardData = {
         },
         "weekly": {
             "dates": [
-                "2024-12-09",
                 "2024-12-16",
                 "2024-12-23",
                 "2024-12-30",
@@ -2678,11 +2670,9 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 56
             ],
             "revenue": [
-                0.0,
                 0.0,
                 0.0,
                 0.0,
@@ -2788,11 +2778,9 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 2
             ],
             "likes": [
-                0,
                 0,
                 0,
                 0,
@@ -2898,11 +2886,9 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 1
             ],
             "shares": [
-                0,
                 0,
                 0,
                 0,
