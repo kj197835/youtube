@@ -3,12 +3,11 @@ window.dashboardData = {
         "total_views_30d": 135,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 2,
-        "last_updated": "2025-12-12 06:00:05"
+        "last_updated": "2025-12-12 15:00:05"
     },
     "trends": {
         "daily": {
             "dates": [
-                "2024-12-11",
                 "2024-12-12",
                 "2024-12-13",
                 "2024-12-14",
@@ -374,7 +373,6 @@ window.dashboardData = {
                 "2025-12-09"
             ],
             "views": [
-                0,
                 0,
                 0,
                 0,
@@ -1102,11 +1100,9 @@ window.dashboardData = {
                 0.0,
                 0.0,
                 0.0,
-                0.0,
                 0.0
             ],
             "subscribers": [
-                0,
                 0,
                 0,
                 0,
@@ -1827,7 +1823,6 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 2,
                 0,
                 1,
@@ -2193,7 +2188,6 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                0,
                 1,
                 0,
                 0,
@@ -2204,7 +2198,6 @@ window.dashboardData = {
                 0
             ],
             "shares": [
-                0,
                 0,
                 0,
                 0,
