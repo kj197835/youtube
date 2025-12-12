@@ -1,9 +1,9 @@
 window.dashboardData = {
     "summary": {
-        "total_views_30d": 135,
+        "total_views_30d": 142,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 2,
-        "last_updated": "2025-12-12 15:00:05"
+        "last_updated": "2025-12-13 06:00:05"
     },
     "trends": {
         "daily": {
@@ -370,7 +370,8 @@ window.dashboardData = {
                 "2025-12-06",
                 "2025-12-07",
                 "2025-12-08",
-                "2025-12-09"
+                "2025-12-09",
+                "2025-12-10"
             ],
             "views": [
                 0,
@@ -735,9 +736,11 @@ window.dashboardData = {
                 0,
                 3,
                 60,
-                5
+                5,
+                17
             ],
             "revenue": [
+                0.0,
                 0.0,
                 0.0,
                 0.0,
@@ -1465,6 +1468,7 @@ window.dashboardData = {
                 0,
                 2,
                 1,
+                0,
                 0
             ],
             "likes": [
@@ -1830,6 +1834,7 @@ window.dashboardData = {
                 0,
                 1,
                 3,
+                0,
                 0
             ],
             "comments": [
@@ -2189,6 +2194,7 @@ window.dashboardData = {
                 0,
                 0,
                 1,
+                0,
                 0,
                 0,
                 0,
@@ -2560,6 +2566,7 @@ window.dashboardData = {
                 0,
                 0,
                 1,
+                0,
                 0
             ]
         },
@@ -2672,7 +2679,7 @@ window.dashboardData = {
                 0,
                 0,
                 116,
-                5
+                22
             ],
             "revenue": [
                 0.0,
@@ -2979,7 +2986,7 @@ window.dashboardData = {
                 0,
                 0,
                 0,
-                121
+                138
             ],
             "revenue": [
                 0.0,
@@ -3060,25 +3067,36 @@ window.dashboardData = {
     },
     "prediction": {
         "dates": [
-            "2025-12-10",
             "2025-12-11",
             "2025-12-12",
             "2025-12-13",
             "2025-12-14",
             "2025-12-15",
-            "2025-12-16"
+            "2025-12-16",
+            "2025-12-17"
         ],
         "views": [
             1,
             1,
-            1,
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2,
+            2
         ]
     },
     "top_videos": [
+        {
+            "video": "wFqzxvKPO3M",
+            "views": 43,
+            "estimatedMinutesWatched": 52,
+            "subscribersGained": 0,
+            "likes": 1,
+            "dislikes": 0,
+            "comments": 0,
+            "shares": 1,
+            "estimatedRevenue": 0.0
+        },
         {
             "video": "Wb2Dvo1rbmw",
             "views": 34,
@@ -3091,20 +3109,9 @@ window.dashboardData = {
             "estimatedRevenue": 0.0
         },
         {
-            "video": "wFqzxvKPO3M",
-            "views": 34,
-            "estimatedMinutesWatched": 37,
-            "subscribersGained": 0,
-            "likes": 1,
-            "dislikes": 0,
-            "comments": 0,
-            "shares": 1,
-            "estimatedRevenue": 0.0
-        },
-        {
             "video": "8SgGs5tNmpk",
-            "views": 28,
-            "estimatedMinutesWatched": 27,
+            "views": 29,
+            "estimatedMinutesWatched": 28,
             "subscribersGained": 1,
             "likes": 3,
             "dislikes": 0,
@@ -3114,8 +3121,8 @@ window.dashboardData = {
         },
         {
             "video": "SZocibagft4",
-            "views": 15,
-            "estimatedMinutesWatched": 35,
+            "views": 19,
+            "estimatedMinutesWatched": 51,
             "subscribersGained": 0,
             "likes": 1,
             "dislikes": 0,
@@ -3125,8 +3132,8 @@ window.dashboardData = {
         },
         {
             "video": "dOyrylMfBvg",
-            "views": 10,
-            "estimatedMinutesWatched": 8,
+            "views": 13,
+            "estimatedMinutesWatched": 14,
             "subscribersGained": 0,
             "likes": 1,
             "dislikes": 0,
