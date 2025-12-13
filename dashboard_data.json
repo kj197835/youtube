@@ -1,9 +1,9 @@
 {
     "summary": {
-        "total_views_30d": 142,
+        "total_views_30d": 146,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 2,
-        "last_updated": "2025-12-13 15:00:05"
+        "last_updated": "2025-12-14 06:00:05"
     },
     "trends": {
         "daily": {
@@ -370,7 +370,8 @@
                 "2025-12-07",
                 "2025-12-08",
                 "2025-12-09",
-                "2025-12-10"
+                "2025-12-10",
+                "2025-12-11"
             ],
             "views": [
                 0,
@@ -735,9 +736,11 @@
                 3,
                 60,
                 5,
-                17
+                17,
+                4
             ],
             "revenue": [
+                0.0,
                 0.0,
                 0.0,
                 0.0,
@@ -1465,6 +1468,7 @@
                 2,
                 1,
                 0,
+                0,
                 0
             ],
             "likes": [
@@ -1830,6 +1834,7 @@
                 1,
                 3,
                 0,
+                0,
                 0
             ],
             "comments": [
@@ -2188,6 +2193,7 @@
                 0,
                 0,
                 1,
+                0,
                 0,
                 0,
                 0,
@@ -2560,6 +2566,7 @@
                 0,
                 1,
                 0,
+                0,
                 0
             ]
         },
@@ -2672,7 +2679,7 @@
                 0,
                 0,
                 116,
-                22
+                26
             ],
             "revenue": [
                 0.0,
@@ -2979,7 +2986,7 @@
                 0,
                 0,
                 0,
-                138
+                142
             ],
             "revenue": [
                 0.0,
@@ -3060,16 +3067,16 @@
     },
     "prediction": {
         "dates": [
-            "2025-12-11",
             "2025-12-12",
             "2025-12-13",
             "2025-12-14",
             "2025-12-15",
             "2025-12-16",
-            "2025-12-17"
+            "2025-12-17",
+            "2025-12-18"
         ],
         "views": [
-            1,
+            2,
             2,
             2,
             2,
@@ -3081,7 +3088,7 @@
     "top_videos": [
         {
             "video": "wFqzxvKPO3M",
-            "views": 43,
+            "views": 44,
             "estimatedMinutesWatched": 52,
             "subscribersGained": 0,
             "likes": 1,
@@ -3114,7 +3121,7 @@
         },
         {
             "video": "SZocibagft4",
-            "views": 19,
+            "views": 20,
             "estimatedMinutesWatched": 51,
             "subscribersGained": 0,
             "likes": 1,
@@ -3125,8 +3132,8 @@
         },
         {
             "video": "dOyrylMfBvg",
-            "views": 13,
-            "estimatedMinutesWatched": 14,
+            "views": 15,
+            "estimatedMinutesWatched": 17,
             "subscribersGained": 0,
             "likes": 1,
             "dislikes": 0,
