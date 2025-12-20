@@ -22,3 +22,5 @@ SCOPES = [
 STATS_FILE = DATA_DIR / "youtube_stats.csv"
 TOP_VIDEOS_FILE = DATA_DIR / "top_videos.csv"
 DASHBOARD_DATA_FILE = BASE_DIR / "dashboard_data.json"
+DEMOGRAPHICS_FILE = DATA_DIR / "demographics.json"
+TRAFFIC_SOURCES_FILE = DATA_DIR / "traffic_sources.csv"
