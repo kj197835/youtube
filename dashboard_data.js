@@ -7,7 +7,7 @@ window.dashboardData = {
         "subs_gained_30d": 2,
         "total_watch_time_hours_30d": 3,
         "avg_engagement_rate_30d": 4.82,
-        "last_updated": "2025-12-21 01:14:04"
+        "last_updated": "2025-12-21 06:00:06"
     },
     "trends": {
         "daily": {
