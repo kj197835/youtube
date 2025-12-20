@@ -13,3 +13,8 @@
 2025-12-07 12:23:13.750513: <HttpError 500 when requesting https://youtubeanalytics.googleapis.com/v2/reports?ids=channel%3D%3DMINE&startDate=2025-11-07&endDate=2025-12-07&metrics=views%2CestimatedMinutesWatched%2CestimatedRevenue%2CsubscribersGained&dimensions=day&sort=day&alt=json returned "Internal error encountered.". Details: "[{'message': 'Internal error encountered.', 'domain': 'global', 'reason': 'backendError'}]">
 2025-12-07 13:07:42.105012: (mismatching_state) CSRF Warning! State not equal in request and response.
 2025-12-09 14:08:33.018285: <HttpError 400 when requesting https://youtubeanalytics.googleapis.com/v2/reports?ids=channel%3D%3DMINE&startDate=2024-12-09&endDate=2025-12-09&metrics=views%2CestimatedMinutesWatched%2CsubscribersGained%2Clikes%2Cdislikes%2Ccomments%2Cshares%2CaverageViewDuration%2CcardClicks%2CendScreenElementClicks&dimensions=day&sort=day&alt=json returned "Unknown identifier (endScreenElementClicks) given in field parameters.metrics.". Details: "[{'message': 'Unknown identifier (endScreenElementClicks) given in field parameters.metrics.', 'domain': 'global', 'reason': 'invalid'}]">
+2025-12-20 09:35:13.206252: (mismatching_state) CSRF Warning! State not equal in request and response.
+2025-12-20 09:39:24.210366: 'NoneType' object has no attribute 'replace'
+2025-12-20 09:40:55.040976: 'InstalledAppFlow' object has no attribute 'run_console'
+2025-12-20 14:18:44.569200: name 'fetch_traffic_sources' is not defined
+2025-12-20 14:51:05.917673: cannot access local variable 'analytics_df' where it is not associated with a value

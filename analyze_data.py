@@ -15,7 +15,34 @@ def load_data():
         return None
     df = pd.read_csv(config.STATS_FILE)
     df['day'] = pd.to_datetime(df['day'])
+    
+    # Ensure full 365-day range coverage
+    end_date = pd.Timestamp.now().normalize()
+    start_date = end_date - pd.Timedelta(days=365)
+    full_range = pd.date_range(start=start_date, end=end_date, freq='D')
+    
+    # Reindex to full range, filling missing stats with 0
+    df = df.set_index('day').reindex(full_range).fillna(0).reset_index().rename(columns={'index': 'day'})
+    
+    # Fill NaN for new columns if they don't exist in old rows
+    cols_to_fill = ['likes', 'dislikes', 'comments', 'shares', 'averageViewDuration', 'views', 'estimatedRevenue', 'subscribersGained']
+    for col in cols_to_fill:
+        if col not in df.columns:
+            df[col] = 0
+            
     return df.sort_values('day')
+
+def load_demographics():
+    if not config.DEMOGRAPHICS_FILE.exists():
+        return {}
+    with open(config.DEMOGRAPHICS_FILE, 'r') as f:
+        return json.load(f)
+
+def load_traffic_sources():
+    if not config.TRAFFIC_SOURCES_FILE.exists():
+        return []
+    df = pd.read_csv(config.TRAFFIC_SOURCES_FILE)
+    return df.to_dict('records')
 
 def load_top_videos():
     if not config.TOP_VIDEOS_FILE.exists():
@@ -78,7 +105,12 @@ def main():
     pred_dates, pred_views = predict_metric(df, 'views', 7)
     
     # Top Videos
+    # Top Videos
     top_videos = load_top_videos()
+    
+    # Demographics & Traffic
+    demographics = load_demographics()
+    traffic_sources = load_traffic_sources()
 
     # Prepare JSON structure
     # Load Realtime Stats if available
@@ -88,17 +120,68 @@ def main():
         with open(channel_stats_file, 'r') as f:
             channel_stats = json.load(f)
 
-    # Use Realtime stats for Summary if available, otherwise fallback to 30d sum
+    # Calculate fallback totals from Top Videos
+    top_videos_views = sum(v.get('views', 0) for v in top_videos)
+    top_videos_revenue = sum(v.get('estimatedRevenue', 0) for v in top_videos)
+    
+    # Calculate fallback totals from Traffic Sources (Most reliable in this case)
+    traffic_sources = load_traffic_sources()
+    traffic_views = sum(int(t.get('views', 0)) for t in traffic_sources)
+    traffic_minutes = sum(float(t.get('estimatedMinutesWatched', 0)) for t in traffic_sources)
+
+    # Use Realtime stats for Summary if available
     summary_views = int(channel_stats.get('total_views', total_views_30d))
+    
+    # Logic: Fallback cascade
+    if summary_views == 0:
+        if top_videos_views > 0:
+            summary_views = top_videos_views
+        elif traffic_views > 0:
+             summary_views = traffic_views
+
     summary_subs = int(channel_stats.get('subscribers', total_subs_30d))
-    # Revenue is not available in realtime stats, so keep 30d sum
+    
+    # Revenue fallback
     summary_revenue = round(float(total_revenue_30d), 2)
+    if summary_revenue == 0 and top_videos_revenue > 0:
+        summary_revenue = round(float(top_videos_revenue), 2)
+        
+    # Calculate Watch Time (Hours)
+    # 1. From Channel Stats? No.
+    # 2. From Daily Trends?
+    summary_watch_hours = 0
+    if not daily_df.empty and 'estimatedMinutesWatched' in daily_df.columns:
+        summary_watch_hours = round(daily_df['estimatedMinutesWatched'].sum() / 60)
+    
+    # Fallback Watch Time
+    if summary_watch_hours == 0 and traffic_minutes > 0:
+        summary_watch_hours = round(traffic_minutes / 60)
+        
+    # Calculate Engagement Rate Fallback (Likes + Comments / Views * 100)
+    # 1. From Daily Trends
+    trends_likes = daily_df['likes'].sum() if 'likes' in daily_df.columns else 0
+    trends_comments = daily_df['comments'].sum() if 'comments' in daily_df.columns else 0
+    trends_views = daily_df['views'].sum() if 'views' in daily_df.columns else 0
+    
+    engagement_rate = 0
+    if trends_views > 0:
+        engagement_rate = ((trends_likes + trends_comments) / trends_views) * 100
+        
+    # 2. Fallback from Top Videos
+    if engagement_rate == 0 and top_videos_views > 0:
+        top_likes = sum(v.get('likes', 0) for v in top_videos)
+        top_comments = sum(v.get('comments', 0) for v in top_videos)
+        engagement_rate = ((top_likes + top_comments) / top_videos_views) * 100
 
     dashboard_data = {
         "summary": {
+            "channel_name": channel_stats.get('channel_name', 'Unknown'),
+            "profile_image": channel_stats.get('profile_image', ''),
             "total_views_30d": summary_views,
             "estimated_revenue_30d": summary_revenue,
             "subs_gained_30d": summary_subs,
+            "total_watch_time_hours_30d": summary_watch_hours,
+            "avg_engagement_rate_30d": round(engagement_rate, 2),
             "last_updated": get_kst_now().strftime("%Y-%m-%d %H:%M:%S")
         },
         "trends": {
@@ -108,8 +191,10 @@ def main():
                 "revenue": daily_df['estimatedRevenue'].tolist(),
                 "subscribers": daily_df['subscribersGained'].tolist(),
                 "likes": daily_df['likes'].tolist(),
+                "dislikes": daily_df['dislikes'].tolist(),
                 "comments": daily_df['comments'].tolist(),
-                "shares": daily_df['shares'].tolist()
+                "shares": daily_df['shares'].tolist(),
+                "averageViewDuration": daily_df['averageViewDuration'].tolist()
             },
             "weekly": {
                 "dates": weekly_df['day'].tolist(),
@@ -117,8 +202,10 @@ def main():
                 "revenue": weekly_df['estimatedRevenue'].tolist(),
                 "subscribers": weekly_df['subscribersGained'].tolist(),
                 "likes": weekly_df['likes'].tolist(),
+                "dislikes": weekly_df['dislikes'].tolist(),
                 "comments": weekly_df['comments'].tolist(),
-                "shares": weekly_df['shares'].tolist()
+                "shares": weekly_df['shares'].tolist(),
+                "averageViewDuration": weekly_df['averageViewDuration'].tolist()
             },
             "monthly": {
                 "dates": monthly_df['day'].tolist(),
@@ -126,15 +213,19 @@ def main():
                 "revenue": monthly_df['estimatedRevenue'].tolist(),
                 "subscribers": monthly_df['subscribersGained'].tolist(),
                 "likes": monthly_df['likes'].tolist(),
+                "dislikes": monthly_df['dislikes'].tolist(),
                 "comments": monthly_df['comments'].tolist(),
-                "shares": monthly_df['shares'].tolist()
+                "shares": monthly_df['shares'].tolist(),
+                "averageViewDuration": monthly_df['averageViewDuration'].tolist()
             }
         },
         "prediction": {
             "dates": pred_dates,
             "views": pred_views
         },
-        "top_videos": top_videos
+        "top_videos": top_videos,
+        "demographics": demographics,
+        "traffic_sources": traffic_sources
     }
     
     # Save JSON
