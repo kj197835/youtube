@@ -38,7 +38,7 @@ const App: React.FC = () => {
     const fetchData = async () => {
         try {
             setLoadingData(true);
-            const res = await fetch('dashboard_data.json');
+            const res = await fetch('./dashboard_data.json');
             if (!res.ok) {
                 throw new Error("Failed to load data");
             }
