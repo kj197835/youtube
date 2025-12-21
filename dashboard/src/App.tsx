@@ -204,7 +204,7 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="h-[400px]">
+                            <div className="h-[65vw] sm:h-[400px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     {chartType === 'Daily' ? (
                                         <BarChart data={displayChartData}>
@@ -331,25 +331,27 @@ const App: React.FC = () => {
                                     <p className="text-sm mt-1">Daily stats might be hidden by YouTube for privacy.</p>
                                 </div>
                             ) : (
-                                <ResponsiveContainer width="100%" height={400}>
-                                    {chartType === 'Daily' ? (
-                                        <BarChart data={displayChartData}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                            <Tooltip cursor={{ fill: '#f3f4f6' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                            <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
-                                        </BarChart>
-                                    ) : (
-                                        <AreaChart data={displayChartData}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                            <Area type="monotone" dataKey={selectedMetric} stroke="#ef4444" fill="#fee2e2" strokeWidth={3} />
-                                        </AreaChart>
-                                    )}
-                                </ResponsiveContainer>
+                                <div className="h-[65vw] sm:h-[400px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        {chartType === 'Daily' ? (
+                                            <BarChart data={displayChartData}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                                <Tooltip cursor={{ fill: '#f3f4f6' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                                <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
+                                            </BarChart>
+                                        ) : (
+                                            <AreaChart data={displayChartData}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                                <Area type="monotone" dataKey={selectedMetric} stroke="#ef4444" fill="#fee2e2" strokeWidth={3} />
+                                            </AreaChart>
+                                        )}
+                                    </ResponsiveContainer>
+                                </div>
                             )}
                         </div>
                         <InsightSection insights={insights} title="AI Prediction Insights" />
