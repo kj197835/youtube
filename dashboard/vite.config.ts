@@ -11,7 +11,8 @@ export default defineConfig({
         },
     },
     build: {
-        outDir: '../dist', // Build to a dist folder in the root of YouTube repo for easy access
+        outDir: './dist', // Build to local dist folder so it syncs to host via volume
         emptyOutDir: true,
-    }
+    },
+    base: '/youtube/', // Needed for GitHub Pages deployment
 })

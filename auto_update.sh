@@ -22,11 +22,18 @@ if [ $EXIT_CODE -ne 0 ]; then
     exit $EXIT_CODE
 fi
 
-echo "[$DATE] Data update successful. Proceeding to GitHub sync..." >> "$LOG_FILE"
+echo "[$DATE] Data update successful. Proceeding to Build & Deploy..." >> "$LOG_FILE"
+# Build React Dashboard
+echo "[$DATE] Building Dashboard..." >> "$LOG_FILE"
+/usr/local/bin/docker-compose run --rm dashboard sh -c "npm install && npm run build" >> "$LOG_FILE" 2>&1
+
+# Copy build artifacts to root for GitHub Pages
+echo "[$DATE] Deploying to root..." >> "$LOG_FILE"
+cp -r dashboard/dist/* .
 
 # Git Sync
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
-git add -f data/*.csv dashboard_data.json analyze_data.py fetch_data.py auto_update.sh
+git add -f data/*.csv dashboard_data.json analyze_data.py fetch_data.py auto_update.sh index.html assets/
 git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
 git push origin main >> "$LOG_FILE" 2>&1
 

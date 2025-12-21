@@ -189,7 +189,7 @@ def fetch_top_videos(analytics, youtube):
                     # Thumbnail Caching Logic
                     thumb_filename = f"{vid_id}.jpg"
                     local_thumb_path = os.path.join("dashboard", "public", "thumbnails", thumb_filename)
-                    public_path = f"/thumbnails/{thumb_filename}"
+                    public_path = f"thumbnails/{thumb_filename}"
                     
                     # Create directory if not exists
                     os.makedirs(os.path.dirname(local_thumb_path), exist_ok=True)
