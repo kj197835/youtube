@@ -379,7 +379,7 @@ const App: React.FC = () => {
 
                     <div className="w-10 h-10 rounded-xl bg-gray-200 overflow-hidden shadow-md">
                         <img
-                            src="/AI_SOUND_LAB1.png"
+                            src="AI_SOUND_LAB1.png"
                             alt="AI Sound Lab"
                             className="w-full h-full object-cover"
                         />

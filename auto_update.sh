@@ -33,7 +33,7 @@ cp -r dashboard/dist/* .
 
 # Git Sync
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
-git add -f data/*.csv dashboard_data.json analyze_data.py fetch_data.py auto_update.sh index.html assets/
+git add -f data/*.csv dashboard_data.json analyze_data.py fetch_data.py auto_update.sh index.html assets/ Images/ thumbnails/
 git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
 git push origin main >> "$LOG_FILE" 2>&1
 
