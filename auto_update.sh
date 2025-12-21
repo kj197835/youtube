@@ -26,7 +26,7 @@ echo "[$DATE] Data update successful. Proceeding to GitHub sync..." >> "$LOG_FIL
 
 # Git Sync
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
-git add -f data/*.csv dashboard_data.json dashboard_data.js index.html analyze_data.py fetch_data.py auto_update.sh
+git add -f data/*.csv dashboard_data.json analyze_data.py fetch_data.py auto_update.sh
 git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
 git push origin main >> "$LOG_FILE" 2>&1
 
