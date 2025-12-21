@@ -7,7 +7,7 @@
         "subs_gained_30d": 2,
         "total_watch_time_hours_30d": 3,
         "avg_engagement_rate_30d": 4.73,
-        "last_updated": "2025-12-21 15:00:06"
+        "last_updated": "2025-12-21 22:54:27"
     },
     "trends": {
         "daily": {
@@ -3990,7 +3990,7 @@
             "comments": 0,
             "shares": 1,
             "title": "The Spitter - \ucc28\uac00\uc6b4 \ube44, \ub274\uc695\uc758 \uac70\ub9ac\uc5d0\uc11c \ud3ed\ubc1c\ud55c \ubd84\ub178. \uac31\uc2a4\ud130 \ud799\ud569 (Gangster Rap).",
-            "thumbnail": "/thumbnails/wFqzxvKPO3M.jpg",
+            "thumbnail": "thumbnails/wFqzxvKPO3M.jpg",
             "estimatedRevenue": 0.0
         },
         {
@@ -4003,7 +4003,7 @@
             "comments": 1,
             "shares": 4,
             "title": "Numb City (\ubb34\uac10\uac01\ud55c \ub3c4\uc2dc) - \ud1f4\uadfc\uae38 \uac10\uc131 AI \ud799\ud569",
-            "thumbnail": "/thumbnails/8SgGs5tNmpk.jpg",
+            "thumbnail": "thumbnails/8SgGs5tNmpk.jpg",
             "estimatedRevenue": 0.0
         },
         {
@@ -4016,7 +4016,7 @@
             "comments": 0,
             "shares": 2,
             "title": "2025\ub144 12\uc6d4 3\uc77c",
-            "thumbnail": "/thumbnails/Wb2Dvo1rbmw.jpg",
+            "thumbnail": "thumbnails/Wb2Dvo1rbmw.jpg",
             "estimatedRevenue": 0.0
         },
         {
@@ -4029,7 +4029,7 @@
             "comments": 0,
             "shares": 0,
             "title": "In the indifferent city - \uc7bf\ube5b \ub3c4\uc2dc, \uc7a0 \ubabb \ub4dc\ub294 \ubc24 \ud83c\udf03 | AI\uc640 \ud568\uaed8\ud558\ub294 \uc6b0\uc6b8\ud55c R&B POP",
-            "thumbnail": "/thumbnails/SZocibagft4.jpg",
+            "thumbnail": "thumbnails/SZocibagft4.jpg",
             "estimatedRevenue": 0.0
         },
         {
@@ -4042,7 +4042,7 @@
             "comments": 0,
             "shares": 0,
             "title": "Family Christmas Vibe - \ub208 \ub0b4\ub9ac\ub294 \ubc24, \uc138\uc0c1\uc5d0\uc11c \uac00\uc7a5 \ub530\ub73b\ud55c \uacf3 \ud83c\udfe0",
-            "thumbnail": "/thumbnails/dOyrylMfBvg.jpg",
+            "thumbnail": "thumbnails/dOyrylMfBvg.jpg",
             "estimatedRevenue": 0.0
         }
     ],

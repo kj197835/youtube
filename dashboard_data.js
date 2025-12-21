@@ -1,4 +1,4 @@
-{
+window.dashboardData = {
     "summary": {
         "channel_name": "AI Sound Lab",
         "profile_image": "https://yt3.ggpht.com/td9BQjJZW21SJxIU9mMvTeEaBENsUC1W-di3T72fM_xn67CRd0cjUUBnBbGx6bsnNko-5lKMb7E=s88-c-k-c0x00ffffff-no-rj",
@@ -4112,4 +4112,4 @@
             "estimatedMinutesWatched": 0
         }
     ]
-}
+};
