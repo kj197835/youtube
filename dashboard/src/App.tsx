@@ -8,7 +8,7 @@ import InsightSection from './components/InsightSection';
 const NavItem: React.FC<{ label: AppTab; active: boolean; onClick: () => void; icon: React.ReactNode }> = ({ label, active, onClick, icon }) => (
     <button
         onClick={onClick}
-        className={`relative flex items-center gap-2 px-4 py-4 text-sm font-bold transition-all whitespace-nowrap ${active ? 'text-red-600' : 'text-gray-500 hover:text-gray-900'
+        className={`relative flex items-center gap-2 px-2 sm:px-4 py-4 text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${active ? 'text-red-600' : 'text-gray-500 hover:text-gray-900'
             }`}
     >
         {icon}
@@ -371,7 +371,7 @@ const App: React.FC = () => {
                         <h1 className="text-xl font-black text-gray-900 tracking-tighter hidden sm:block">AI Sound Lab</h1>
                     </div>
 
-                    <nav className="hidden lg:flex items-center gap-2">
+                    <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
                         <NavItem label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} icon={null} />
                         <NavItem label="Content" active={activeTab === 'Content'} onClick={() => setActiveTab('Content')} icon={null} />
                         <NavItem label="Analytics" active={activeTab === 'Analytics'} onClick={() => setActiveTab('Analytics')} icon={null} />
