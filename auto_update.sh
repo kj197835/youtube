@@ -14,7 +14,7 @@ echo "[$DATE] Starting daily update..." >> "$LOG_FILE"
 # Run Data Fetching & Analysis via Docker
 # We use 'run --rm' to clean up container after exit
 echo "[$DATE] Running YIAPS in Docker..." >> "$LOG_FILE"
-/usr/local/bin/docker-compose run --rm yiaps sh -c "python fetch_data.py && python analyze_data.py" >> "$LOG_FILE" 2>&1
+/usr/local/bin/docker-compose run --rm yiaps sh -c "python fetch_data.py" >> "$LOG_FILE" 2>&1
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then
@@ -33,8 +33,8 @@ cp -r dashboard/dist/* .
 
 # Git Sync
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
-git add -f data/*.csv dashboard_data.json analyze_data.py fetch_data.py auto_update.sh index.html assets/ thumbnails/ AI_SOUND_LAB1.png
+git add -f data/*.csv dashboard_data.json database.py fetch_data.py auto_update.sh index.html assets/ thumbnails/ AI_SOUND_LAB1.png
 git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
-git push origin main >> "$LOG_FILE" 2>&1
+git push origin yt-upgrade >> "$LOG_FILE" 2>&1
 
 echo "[$DATE] Update completed." >> "$LOG_FILE"
