@@ -1,20 +1,27 @@
 import os
+import sys
 import datetime
-import pandas as pd
+import argparse
 import json
-import numpy as np
-from datetime import timedelta, timezone
+import pandas as pd
+import shutil
+from dateutil.relativedelta import relativedelta
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from sklearn.linear_model import LinearRegression
 
 import config
-from database import init_db, get_session, Channel, DailyStat, Video, VideoStat
+from database import (
+    init_db, get_session, engine,
+    Channel, ChannelDaily, Video, VideoDaily, Comment,
+    DemographicsAge, DemographicsGender, Geography, TrafficSource
+)
 
-# --- Auth & API Functions ---
+# --- Constants ---
+DATE_FORMAT = "%Y-%m-%d"
 
+# --- Auth ---
 def get_credentials():
     creds = None
     if os.path.exists(config.TOKEN_FILE):
@@ -30,390 +37,552 @@ def get_credentials():
             try:
                 creds.refresh(Request())
             except Exception as e:
-                print(f"Error refreshing token: {e}")
+                print(f"Error refreshing: {e}")
                 creds = None
         
         if not creds:
-            print("No valid credentials found. Starting OAuth flow...")
+            print("No valid credentials. Starting OAuth...")
             flow = InstalledAppFlow.from_client_secrets_file(
                 config.CLIENT_SECRET_FILE, config.SCOPES)
             flow.redirect_uri = 'http://localhost:8080/'
             auth_url, _ = flow.authorization_url(prompt='consent')
             print(f"Please visit: {auth_url}")
-            code = input("Enter the authorization code: ")
+            code = input("Enter auth code: ")
             flow.fetch_token(code=code)
             creds = flow.credentials
         
         with open(config.TOKEN_FILE, 'w') as token:
             token.write(creds.to_json())
-            
     return creds
 
-def fetch_channel_stats(youtube):
-    print("Fetching channel statistics...")
-    request = youtube.channels().list(part="statistics,snippet", mine=True)
-    response = request.execute()
-    
-    if "items" in response and len(response["items"]) > 0:
-        item = response["items"][0]
-        stats = item["statistics"]
-        snippet = item["snippet"]
-        return {
-            "channel_id": item["id"],
-            "channel_name": snippet["title"],
-            "profile_image": snippet["thumbnails"]["default"]["url"],
-            "subscribers": int(stats["subscriberCount"]),
-            "total_views": int(stats["viewCount"]),
-            "video_count": int(stats["videoCount"])
-        }
-    return None
+# --- Data Fetching (YouTube Data API) ---
 
-def fetch_analytics(analytics):
-    print("Fetching analytics data (since 2024-01-01)...")
-    end_date = (datetime.date.today() - datetime.timedelta(days=3)).strftime("%Y-%m-%d")
-    start_date = "2024-01-01"
+def fetch_channel_info(youtube):
+    print("Fetching Channel Info...")
+    req = youtube.channels().list(part="snippet,contentDetails,statistics", mine=True)
+    res = req.execute()
+    if not res['items']: return None
+    return res['items'][0]
+
+def fetch_all_videos(youtube, channel_id):
+    print("Fetching ALL Videos (Data API)...")
+    # 1. Get Uploads Playlist ID
+    req = youtube.channels().list(part="contentDetails", id=channel_id)
+    res = req.execute()
+    if not res['items']: return []
+    uploads_id = res['items'][0]['contentDetails']['relatedPlaylists']['uploads']
     
-    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained,likes,dislikes,comments,shares,averageViewDuration"
+    videos = []
+    next_page = None
     
-    try:
-        request = analytics.reports().query(
-            ids="channel==MINE",
-            startDate=start_date,
-            endDate=end_date,
-            metrics=metrics_list,
-            dimensions="day",
-            sort="day"
+    while True:
+        pl_req = youtube.playlistItems().list(
+            part="snippet",
+            playlistId=uploads_id,
+            maxResults=50,
+            pageToken=next_page
         )
-        response = request.execute()
+        pl_res = pl_req.execute()
+        
+        for item in pl_res['items']:
+            snippet = item['snippet']
+            videos.append({
+                'id': snippet['resourceId']['videoId'],
+                'title': snippet['title'],
+                'published_at': snippet['publishedAt'],
+                'thumbnail': snippet['thumbnails'].get('medium', snippet['thumbnails']['default'])['url']
+            })
+            
+        next_page = pl_res.get('nextPageToken')
+        if not next_page: break
+        
+    print(f"Found {len(videos)} videos.")
+    
+    # Enrich with Duration (to check Shorts) in batches
+    # YouTube Data API allows 50 ids per call
+    videos_enriched = []
+    chunk_size = 50
+    for i in range(0, len(videos), chunk_size):
+        chunk = videos[i:i+chunk_size]
+        ids = ",".join([v['id'] for v in chunk])
+        
+        v_req = youtube.videos().list(part="contentDetails", id=ids)
+        v_res = v_req.execute()
+        
+        durations = {item['id']: item['contentDetails']['duration'] for item in v_res['items']}
+        
+        for v in chunk:
+            dur = durations.get(v['id'], "")
+            # Simple heuristic: Shorts are usually <= 60s. 
+            # Duration format PT1M, PT59S. 
+            # We will just store the duration string for now or parse it if strictly needed.
+            # Let's simple check: if 'M' is missing or 1M0S, likely short.
+            # But accurate parsing is safer. Let's just store the duration string in DB.
+            is_short = False 
+            if "M" not in dur and "H" not in dur: is_short = True # Less than a minute
+            if "PT1M0S" == dur: is_short = True
+            
+            v['duration'] = dur
+            v['is_shorts'] = is_short
+            videos_enriched.append(v)
+            
+    return videos_enriched
+
+# --- Analytics API Wrappers ---
+
+def robust_analytics_query(analytics, **kwargs):
+    """Wrapper to handle retries or missing metrics (e.g. revenue) gracefully."""
+    try:
+        return analytics.reports().query(**kwargs).execute()
     except Exception as e:
-        print(f"First attempt failed (maybe revenue?), retrying: {e}")
-        metrics_list = "views,estimatedMinutesWatched,subscribersGained,likes,dislikes,comments,shares,averageViewDuration"
-        request = analytics.reports().query(
-            ids="channel==MINE",
-            startDate=start_date,
-            endDate=end_date,
-            metrics=metrics_list,
-            dimensions="day",
-            sort="day"
-        )
-        response = request.execute()
-    
-    headers = [header["name"] for header in response.get("columnHeaders", [])]
-    rows = response.get("rows", [])
-    df = pd.DataFrame(rows, columns=headers)
-    if 'estimatedRevenue' not in df.columns:
-        df['estimatedRevenue'] = 0.0
+        metrics = kwargs.get('metrics', "")
+        print(f"Query Error for metrics='{metrics}': {e}")
         
-    return df
+        # Check for permission/401 related to revenue
+        if "revenue" in metrics.lower():
+            print("Attempting retry without revenue metrics...")
+            new_metrics = metrics.replace("estimatedRevenue", "").replace(",,", ",").strip(",")
+            if new_metrics.startswith(","): new_metrics = new_metrics[1:]
+            if new_metrics.endswith(","): new_metrics = new_metrics[:-1]
+            
+            kwargs['metrics'] = new_metrics
+            try:
+                return analytics.reports().query(**kwargs).execute()
+            except Exception as e2:
+                print(f"Retry failed: {e2}")
+                return {'rows': [], 'columnHeaders': []}
+        else:
+            print(f"Analytics Query Failed (Non-Revenue): {e}")
+            return {'rows': [], 'columnHeaders': []}
 
-def fetch_top_videos(analytics, youtube):
-    print("Fetching top videos...")
-    end_date = (datetime.date.today() - datetime.timedelta(days=3)).strftime("%Y-%m-%d")
-    start_date = "2024-01-01" # Capture year to date
-    
-    metrics_list = "views,estimatedMinutesWatched,estimatedRevenue,subscribersGained,likes,dislikes,comments,shares"
-    try:
-        request = analytics.reports().query(
-            ids="channel==MINE",
-            startDate=start_date,
-            endDate=end_date,
-            metrics=metrics_list,
-            dimensions="video",
-            sort="-views",
-            maxResults=20
-        )
-        response = request.execute()
-    except:
-        metrics_list = "views,estimatedMinutesWatched,subscribersGained,likes,dislikes,comments,shares"
-        request = analytics.reports().query(
-            ids="channel==MINE",
-            startDate=start_date,
-            endDate=end_date,
-            metrics=metrics_list,
-            dimensions="video",
-            sort="-views",
-            maxResults=20
-        )
-        response = request.execute()
+# --- Upsert Logic ---
 
-    headers = [header["name"] for header in response.get("columnHeaders", [])]
-    rows = response.get("rows", [])
-    df = pd.DataFrame(rows, columns=headers)
+def upsert_channel_stats(session, channel, daily_res):
+    if not daily_res.get('rows'): return
+    headers = [h['name'] for h in daily_res.get('columnHeaders')]
     
-    # Check for empty result
-    if df.empty:
-        return df
+    for row in daily_res.get('rows'):
+        data = dict(zip(headers, row))
+        date_obj = datetime.datetime.strptime(data['day'], DATE_FORMAT).date()
+        
+        stat = session.query(ChannelDaily).filter_by(channel_id=channel.id, date=date_obj).first()
+        if not stat:
+            stat = ChannelDaily(channel_id=channel.id, date=date_obj)
+            session.add(stat)
+        
+        stat.views = int(data.get('views', 0))
+        stat.estimated_revenue = float(data.get('estimatedRevenue', 0.0))
+        stat.watch_time_minutes = float(data.get('estimatedMinutesWatched', 0))
+        stat.subscribers_gained = int(data.get('subscribersGained', 0))
+        stat.likes = int(data.get('likes', 0))
+        stat.dislikes = int(data.get('dislikes', 0))
+        stat.comments = int(data.get('comments', 0))
+        stat.shares = int(data.get('shares', 0))
+        stat.avg_view_duration_seconds = float(data.get('averageViewDuration', 0.0))
 
-    # Enrich with Title/Thumbnail
-    video_ids = df['video'].tolist()
-    video_ids = [v for v in video_ids if v and v != "0"]
-    
-    id_to_meta = {}
-    if video_ids:
+def upsert_videos(session, channel_id, video_list):
+    for v in video_list:
+        db_vid = session.query(Video).filter_by(id=v['id']).first()
+        if not db_vid:
+            db_vid = Video(id=v['id'], channel_id=channel_id)
+            session.add(db_vid)
+        
+        db_vid.title = v['title']
+        db_vid.thumbnail_url = v['thumbnail']
         try:
-            vid_request = youtube.videos().list(part="snippet", id=",".join(video_ids))
-            vid_response = vid_request.execute()
+            pub_dt = datetime.datetime.strptime(v['published_at'], "%Y-%m-%dT%H:%M:%SZ")
+            db_vid.published_at = pub_dt
+        except:
+            pass
             
-            for item in vid_response.get("items", []):
-                vid = item["id"]
-                snip = item["snippet"]
-                id_to_meta[vid] = {
-                    "title": snip["title"],
-                    "thumbnail": snip["thumbnails"].get("medium", snip["thumbnails"]["default"])["url"]
-                }
-                
-                # Download thumbnail logic (simplified for brevity, can reinstate full logic if needed)
-                # For now we use the URL or implement download separately
-                # Keeping it simple: Use remote URL or local if already exists
-                thumb_filename = f"{vid}.jpg"
-                local_thumb = os.path.join("dashboard", "public", "thumbnails", thumb_filename)
-                
-                if not os.path.exists(local_thumb):
-                    os.makedirs(os.path.dirname(local_thumb), exist_ok=True)
-                    try:
-                        import urllib.request
-                        urllib.request.urlretrieve(id_to_meta[vid]["thumbnail"], local_thumb)
-                        id_to_meta[vid]["thumbnail"] = f"thumbnails/{thumb_filename}"
-                    except:
-                        pass # Keep remote URL
-                else:
-                    id_to_meta[vid]["thumbnail"] = f"thumbnails/{thumb_filename}"
+        db_vid.video_length = v.get('duration', '')
+        db_vid.is_shorts = v.get('is_shorts', False)
 
-        except Exception as e:
-            print(f"Error fetching video details: {e}")
+def upsert_video_daily(session, video_id, daily_res):
+    if not daily_res.get('rows'): return
+    headers = [h['name'] for h in daily_res.get('columnHeaders')]
+    
+    for row in daily_res.get('rows'):
+        data = dict(zip(headers, row))
+        date_obj = datetime.datetime.strptime(data['day'], DATE_FORMAT).date()
+        
+        stat = session.query(VideoDaily).filter_by(video_id=video_id, date=date_obj).first()
+        if not stat:
+            stat = VideoDaily(video_id=video_id, date=date_obj)
+            session.add(stat)
+        
+        stat.views = int(data.get('views', 0))
+        stat.estimated_revenue = float(data.get('estimatedRevenue', 0.0))
+        stat.watch_time_minutes = float(data.get('estimatedMinutesWatched', 0))
+        stat.subscribers_gained = int(data.get('subscribersGained', 0))
+        stat.likes = int(data.get('likes', 0))
+        stat.dislikes = int(data.get('dislikes', 0))
+        stat.comments = int(data.get('comments', 0))
+        stat.shares = int(data.get('shares', 0))
+
+def fetch_channel_daily(analytics, start, end):
+    print(f"Fetching Channel Daily Stats ({start} to {end})...")
+    metrics = "views,estimatedRevenue,estimatedMinutesWatched,subscribersGained,likes,dislikes,comments,shares,averageViewDuration"
+    return robust_analytics_query(
+        analytics,
+        ids="channel==MINE",
+        startDate=start,
+        endDate=end,
+        metrics=metrics,
+        dimensions="day",
+        sort="day"
+    )
+
+def fetch_video_daily(analytics, video_id, start, end):
+    # print(f"Fetching Daily for Video {video_id}...")
+    metrics = "views,estimatedRevenue,estimatedMinutesWatched,subscribersGained,likes,dislikes,comments,shares"
+    return robust_analytics_query(
+        analytics,
+        ids="channel==MINE",
+        startDate=start,
+        endDate=end,
+        filters=f"video=={video_id}",
+        metrics=metrics,
+        dimensions="day",
+        sort="day"
+    )
+
+def fetch_demographics_daily(analytics, start, end, dimension):
+    print(f"Fetching Demographics ({dimension}) Aggregate ({start} to {end})...")
+    # API Limitation: 'ageGroup' and 'gender' only support 'viewerPercentage' for channel owner reports.
+    # 'country' supports 'views'.
+    metrics = "views,estimatedMinutesWatched"
+    sort = "-views"
+    
+    if dimension in ["ageGroup", "gender"]:
+        metrics = "viewerPercentage"
+        sort = "-viewerPercentage"
+        
+    return robust_analytics_query(
+        analytics,
+        ids="channel==MINE",
+        startDate=start,
+        endDate=end,
+        metrics=metrics,
+        dimensions=f"{dimension}",
+        sort=sort
+    )
+
+def fetch_traffic_daily(analytics, start, end):
+    print("Fetching Traffic Sources Daily...")
+    return robust_analytics_query(
+        analytics,
+        ids="channel==MINE",
+        startDate=start,
+        endDate=end,
+        metrics="views,estimatedMinutesWatched",
+        dimensions="day,insightTrafficSourceType",
+        sort="day"
+    )
+
+# --- Upsert Logic ---
+
+def upsert_demographics_age(session, res, date_obj):
+    if not res.get('rows'): return
+    headers = [h['name'] for h in res.get('columnHeaders')]
+    
+    for row in res.get('rows'):
+        data = dict(zip(headers, row)) 
+        group = data['ageGroup']
+        
+        rec = session.query(DemographicsAge).filter_by(date=date_obj, age_group=group).first()
+        if not rec:
+            rec = DemographicsAge(date=date_obj, age_group=group)
+            session.add(rec)
             
-    df['title'] = df['video'].map(lambda x: id_to_meta.get(x, {}).get("title", f"Video {x}"))
-    df['thumbnail'] = df['video'].map(lambda x: id_to_meta.get(x, {}).get("thumbnail", ""))
-    
-    if 'estimatedRevenue' not in df.columns:
-        df['estimatedRevenue'] = 0.0
-    return df
+        rec.viewer_percentage = float(data.get('viewerPercentage', 0.0))
+        rec.views = int(data.get('views', 0))
+        rec.watch_time_minutes = float(data.get('estimatedMinutesWatched', 0))
 
-def fetch_demographics(analytics):
-    print("Fetching demographics...")
-    end = datetime.date.today().strftime("%Y-%m-%d")
-    start = (datetime.date.today() - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
+def upsert_demographics_gender(session, res, date_obj):
+    if not res.get('rows'): return
+    headers = [h['name'] for h in res.get('columnHeaders')]
     
-    data = {}
-    try:
-        req = analytics.reports().query(ids="channel==MINE", startDate=start, endDate=end, metrics="viewerPercentage", dimensions="ageGroup,gender", sort="ageGroup,gender")
-        res = req.execute()
-        data['age_gender'] = {'headers': [h['name'] for h in res.get('columnHeaders',[])], 'rows': res.get('rows',[])}
+    for row in res.get('rows'):
+        data = dict(zip(headers, row))
+        gender = data['gender']
         
-        req2 = analytics.reports().query(ids="channel==MINE", startDate=start, endDate=end, metrics="views,estimatedMinutesWatched", dimensions="country", sort="-views", maxResults=15)
-        res2 = req2.execute()
-        data['geography'] = {'headers': [h['name'] for h in res2.get('columnHeaders',[])], 'rows': res2.get('rows',[])}
-    except Exception as e:
-        print(f"Demographics error: {e}")
-    return data
-
-def fetch_traffic_sources(analytics):
-    print("Fetching traffic sources...")
-    end = (datetime.date.today() - datetime.timedelta(days=3)).strftime("%Y-%m-%d")
-    start = "2024-01-01"
-    try:
-        req = analytics.reports().query(ids="channel==MINE", startDate=start, endDate=end, metrics="views,estimatedMinutesWatched", dimensions="insightTrafficSourceType", sort="-views")
-        res = req.execute()
-        headers = [h['name'] for h in res.get('columnHeaders',[])]
-        return pd.DataFrame(res.get('rows',[]), columns=headers)
-    except:
-        return pd.DataFrame()
-
-# --- Database Functions ---
-
-def save_to_db(channel_info, analytics_df, top_videos_df):
-    print("Saving data to database...")
-    session = get_session()
-    
-    # 1. Update Channel
-    cid = channel_info['channel_id']
-    channel = session.query(Channel).filter_by(id=cid).first()
-    if not channel:
-        channel = Channel(id=cid)
-        session.add(channel)
-    
-    channel.name = channel_info['channel_name']
-    channel.profile_image = channel_info['profile_image']
-    channel.last_updated = datetime.datetime.utcnow()
-    
-    # 2. Update Daily Stats
-    # analytics_df has ['day', 'views', ...]
-    for _, row in analytics_df.iterrows():
-        try:
-            d = datetime.datetime.strptime(row['day'], "%Y-%m-%d").date()
-            stat = session.query(DailyStat).filter_by(channel_id=cid, date=d).first()
-            if not stat:
-                stat = DailyStat(channel_id=cid, date=d)
-                session.add(stat)
-            
-            stat.views = int(row.get('views', 0))
-            stat.subscribers = int(row.get('subscribersGained', 0))
-            stat.revenue = float(row.get('estimatedRevenue', 0.0))
-            stat.watch_time_hours = float(row.get('estimatedMinutesWatched', 0)) / 60.0
-            stat.avg_engagement_rate = 0.0 # Calculate if needed
-        except Exception as e:
-            print(f"Error saving daily stat: {e}")
-            
-    # 3. Update Video Stats
-    today = datetime.datetime.utcnow().date()
-    for _, row in top_videos_df.iterrows():
-        vid = row['video']
-        if not vid or vid == "0": continue
+        rec = session.query(DemographicsGender).filter_by(date=date_obj, gender=gender).first()
+        if not rec:
+            rec = DemographicsGender(date=date_obj, gender=gender)
+            session.add(rec)
         
-        video = session.query(Video).filter_by(id=vid).first()
-        if not video:
-            video = Video(id=vid, channel_id=cid)
-            session.add(video)
+        rec.viewer_percentage = float(data.get('viewerPercentage', 0.0))
+        rec.views = int(data.get('views', 0))
+        rec.watch_time_minutes = float(data.get('estimatedMinutesWatched', 0))
+
+def upsert_geography(session, res, date_obj):
+    if not res.get('rows'): return
+    headers = [h['name'] for h in res.get('columnHeaders')]
+    
+    for row in res.get('rows'):
+        data = dict(zip(headers, row))
+        code = data['country']
         
-        video.title = row.get('title', 'Unknown')
-        video.thumbnail_url = row.get('thumbnail', '')
+        rec = session.query(Geography).filter_by(date=date_obj, country_code=code).first()
+        if not rec:
+            rec = Geography(date=date_obj, country_code=code)
+            session.add(rec)
         
-        # Save Snapshot
-        vstat = session.query(VideoStat).filter_by(video_id=vid, date=today).first()
-        if not vstat:
-            vstat = VideoStat(video_id=vid, date=today)
-            session.add(vstat)
-            
-        vstat.views = int(row.get('views', 0))
-        vstat.likes = int(row.get('likes', 0))
-        vstat.dislikes = int(row.get('dislikes', 0))
-        vstat.comments = int(row.get('comments', 0))
-        vstat.revenue = float(row.get('estimatedRevenue', 0.0))
+        rec.views = int(data.get('views', 0))
+        rec.watch_time_minutes = float(data.get('estimatedMinutesWatched', 0))
+
+def upsert_traffic(session, res):
+    if not res.get('rows'): return
+    headers = [h['name'] for h in res.get('columnHeaders')]
+    
+    for row in res.get('rows'):
+        data = dict(zip(headers, row))
+        date_obj = datetime.datetime.strptime(data['day'], DATE_FORMAT).date()
+        src = data['insightTrafficSourceType']
         
-    session.commit()
-    return cid
+        rec = session.query(TrafficSource).filter_by(date=date_obj, source_type=src).first()
+        if not rec:
+            rec = TrafficSource(date=date_obj, source_type=src)
+            session.add(rec)
+        
+        rec.views = int(data.get('views', 0))
+        rec.watch_time_minutes = float(data.get('estimatedMinutesWatched', 0))
 
-# --- Analysis & Output Functions ---
+# --- JSON Generator (Frontend Compat) ---
 
-def get_kst_now():
-    return datetime.datetime.now(timezone.utc) + timedelta(hours=9)
-
-def aggregate_data(df, freq):
-    if df.empty: return df
-    df = df.copy()
-    df['day'] = pd.to_datetime(df['day'])
-    agg = df.set_index('day').resample(freq).sum().reset_index()
-    agg['day'] = agg['day'].dt.strftime('%Y-%m-%d')
-    return agg
-
-def predict_metric(df, metric='views', days=7):
-    if len(df) < 2: return [], []
-    df = df.copy()
-    df['day_ordinal'] = pd.to_datetime(df['day']).map(datetime.date.toordinal)
-    X = df['day_ordinal'].values.reshape(-1, 1)
-    y = df[metric].values
+def generate_frontend_json(session, channel_id):
+    print("Generating dashboard_data.json from Relational DB...")
     
-    model = LinearRegression()
-    model.fit(X, y)
+    # 1. Summary (Last 30 days)
+    # We can query ChannelDaily for the last 30 entries
+    end_date = datetime.date.today()
+    start_date = end_date - datetime.timedelta(days=30)
     
-    last_date = pd.to_datetime(df['day'].iloc[-1])
-    future_dates = [last_date + timedelta(days=i) for i in range(1, days + 1)]
-    future_X = np.array([d.toordinal() for d in future_dates]).reshape(-1, 1)
-    predictions = model.predict(future_X)
-    
-    return [d.strftime('%Y-%m-%d') for d in future_dates], [round(max(0, p)) for p in predictions]
-
-def generate_dashboard_json(channel_id, top_videos_df, demographics, traffic_df):
-    print("Generating dashboard_data.json from DB...")
-    session = get_session()
-    
-    # Fetch Data from DB
     channel = session.query(Channel).filter_by(id=channel_id).first()
-    stats = session.query(DailyStat).filter_by(channel_id=channel_id).order_by(DailyStat.date).all()
+    stats_30d = session.query(ChannelDaily).filter(
+        ChannelDaily.channel_id == channel_id,
+        ChannelDaily.date >= start_date
+    ).all()
     
-    # Convert to DataFrame
-    data = []
-    for s in stats:
-        data.append({
-            'day': s.date.strftime('%Y-%m-%d'),
-            'views': s.views,
-            'subscribersGained': s.subscribers,
-            'estimatedRevenue': s.revenue,
-            'estimatedMinutesWatched': s.watch_time_hours * 60,
-            # Placeholder for missing columns in DailyStat if we want to match exact schema
-            'likes': 0, 'dislikes': 0, 'comments': 0, 'shares': 0, 'averageViewDuration': 0
-        })
-    df = pd.DataFrame(data)
+    total_views = sum(s.views for s in stats_30d)
+    total_rev = sum(s.estimated_revenue for s in stats_30d)
+    total_subs = sum(s.subscribers_gained for s in stats_30d)
+    total_wt = sum(s.watch_time_minutes for s in stats_30d) / 60
     
-    # Fill gaps
-    if not df.empty:
-        df['day'] = pd.to_datetime(df['day'])
-        full_range = pd.date_range(start=df['day'].min(), end=datetime.datetime.now().date(), freq='D')
-        df = df.set_index('day').reindex(full_range).fillna(0).reset_index().rename(columns={'index': 'day'})
-        df['day'] = df['day'].dt.strftime('%Y-%m-%d')
-
-    # Aggregations
-    daily_df = df
-    weekly_df = aggregate_data(df, 'W-MON')
-    monthly_df = aggregate_data(df, 'ME')
-    
-    # Predictions
-    pred_dates, pred_views = predict_metric(df, 'views')
-    
-    # Summary (30d)
-    last_30 = df.tail(30)
     summary = {
         "channel_name": channel.name if channel else "Unknown",
         "profile_image": channel.profile_image if channel else "",
-        "total_views_30d": int(last_30['views'].sum()),
-        "estimated_revenue_30d": round(last_30['estimatedRevenue'].sum(), 2),
-        "subs_gained_30d": int(last_30['subscribersGained'].sum()),
-        "total_watch_time_hours_30d": int(last_30['estimatedMinutesWatched'].sum() / 60),
-        "avg_engagement_rate_30d": 0.0, # Implement if we track likes daily
-        "last_updated": get_kst_now().strftime("%Y-%m-%d %H:%M:%S")
+        "total_views_30d": total_views,
+        "estimated_revenue_30d": round(total_rev, 2),
+        "subs_gained_30d": total_subs,
+        "total_watch_time_hours_30d": int(total_wt),
+        "avg_engagement_rate_30d": 0.0, # Placeholder
+        "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     
-    # Build JSON
-    output = {
+    # 2. Trends (Daily/Weekly/Monthly)
+    # Fetch ALL history for trends
+    all_stats = session.query(ChannelDaily).filter_by(channel_id=channel_id).order_by(ChannelDaily.date).all()
+    
+    df = pd.DataFrame([{
+        'dates': s.date.strftime(DATE_FORMAT),
+        'views': s.views,
+        'revenue': s.estimated_revenue,
+        'subscribers': s.subscribers_gained,
+        'likes': s.likes,
+        'comments': s.comments,
+        'averageViewDuration': s.avg_view_duration_seconds
+    } for s in all_stats])
+    
+    if df.empty:
+        trend_data = {"daily": {}, "weekly": {}, "monthly": {}}
+    else:
+        df['dt'] = pd.to_datetime(df['dates'])
+        
+        # Resample logic
+        def resample_df(frame, freq):
+            r = frame.set_index('dt').resample(freq).sum().reset_index()
+            r['dates'] = r['dt'].dt.strftime(DATE_FORMAT)
+            return r.drop(columns=['dt'])
+            
+        daily = df.drop(columns=['dt'])
+        weekly = resample_df(df, 'W-MON')
+        monthly = resample_df(df, 'ME')
+        
+        trend_data = {
+            "daily": daily.to_dict(orient='list'),
+            "weekly": weekly.to_dict(orient='list'),
+            "monthly": monthly.to_dict(orient='list')
+        }
+        
+    # 3. Top Videos (Aggregated from VideoDaily or from Video metadata + Snapshot?)
+    # Since we store daily history, we should Query sum of last 30 days per video
+    # Optimization: Query VideoDaily joined with Video
+    from sqlalchemy import func
+    
+    top_v_query = session.query(
+        VideoDaily.video_id,
+        func.sum(VideoDaily.views).label('total_views'),
+        func.sum(VideoDaily.likes).label('total_likes'),
+        func.sum(VideoDaily.comments).label('total_comments'),
+        func.sum(VideoDaily.shares).label('total_shares'),
+        func.sum(VideoDaily.estimated_revenue).label('total_rev')
+    ).filter(
+        VideoDaily.date >= start_date
+    ).group_by(VideoDaily.video_id).order_by(func.sum(VideoDaily.views).desc()).limit(10).all()
+    
+    top_videos_list = []
+    for row in top_v_query:
+        vid = session.query(Video).get(row.video_id)
+        top_videos_list.append({
+            "video": row.video_id,
+            "title": vid.title if vid else row.video_id,
+            "thumbnail": vid.thumbnail_url if vid else "",
+            "views": row.total_views,
+            "likes": row.total_likes,
+            "comments": row.total_comments,
+            "shares": row.total_shares,
+            "estimatedRevenue": round(row.total_rev, 2)
+        })
+
+    # 4. Demographics
+    # Aggregate Age
+    age_query = session.query(
+        DemographicsAge.age_group,
+        func.sum(DemographicsAge.views).label('total_views')
+    ).filter(DemographicsAge.date >= start_date).group_by(DemographicsAge.age_group).all()
+    
+    # Calculate %
+    total_age_views = sum(x.total_views for x in age_query) or 1
+    age_rows = [[x.age_group, "All", x.total_views/total_age_views*100] for x in age_query] # Approximation
+    
+    # Geography
+    geo_query = session.query(
+        Geography.country_code,
+        func.sum(Geography.views).label('v'),
+        func.sum(Geography.watch_time_minutes).label('wt')
+    ).group_by(Geography.country_code).order_by(func.sum(Geography.views).desc()).limit(10).all()
+    
+    geo_rows = [[x.country_code, x.v, x.wt] for x in geo_query]
+    
+    demographics = {
+        "age_gender": {"headers": ["ageGroup", "gender", "viewerPercentage"], "rows": age_rows},
+        "geography": {"headers": ["country", "views", "estimatedMinutesWatched"], "rows": geo_rows}
+    }
+    
+    # 5. Traffic
+    traf_query = session.query(
+        TrafficSource.source_type,
+        func.sum(TrafficSource.views).label('v'),
+        func.sum(TrafficSource.watch_time_minutes).label('wt')
+    ).filter(TrafficSource.date >= start_date).group_by(TrafficSource.source_type).order_by(func.sum(TrafficSource.views).desc()).all()
+    
+    traffic_out = [{"insightTrafficSourceType": x.source_type, "views": x.v, "estimatedMinutesWatched": x.wt} for x in traf_query]
+
+    # Final Output
+    final_json = {
         "summary": summary,
-        "trends": {
-            "daily": daily_df.to_dict(orient='list'),
-            "weekly": weekly_df.to_dict(orient='list'),
-            "monthly": monthly_df.to_dict(orient='list')
-        },
-        "prediction": { "dates": pred_dates, "views": pred_views },
-        "top_videos": top_videos_df.to_dict(orient='records'),
+        "trends": trend_data,
+        "prediction": {"dates": [], "views": []}, # Skipped for now or add simple implementation
+        "top_videos": top_videos_list,
         "demographics": demographics,
-        "traffic_sources": traffic_df.to_dict(orient='records')
+        "traffic_sources": traffic_out
     }
     
     with open(config.DASHBOARD_DATA_FILE, 'w') as f:
-        json.dump(output, f, indent=4)
+        json.dump(final_json, f, indent=4)
         
-    # Valid JS export
-    with open(str(config.DASHBOARD_DATA_FILE).replace('.json', '.js'), 'w') as f:
-        f.write(f"window.dashboardData = {json.dumps(output, indent=4)};")
-        
-    print("Dashboard Data Saved.")
+    # Copy to public
+    public_path = config.BASE_DIR / "dashboard" / "public" / "dashboard_data.json"
+    public_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(config.DASHBOARD_DATA_FILE, public_path)
+    print("Dashboard JSON Generated & Synced.")
+
+# --- Main Logic ---
 
 def main():
-    try:
-        init_db()
-        creds = get_credentials()
-        youtube = build("youtube", "v3", credentials=creds)
-        analytics = build("youtubeAnalytics", "v2", credentials=creds)
+    parser = argparse.ArgumentParser(description="YouTube Data Fetcher & Sync")
+    parser.add_argument("--init", action="store_true", help="Run 3-Year Historical Backfill")
+    args = parser.parse_args()
+    
+    init_db()
+    session = get_session()
+    
+    creds = get_credentials()
+    if not creds: return
+    
+    youtube = build("youtube", "v3", credentials=creds)
+    analytics = build("youtubeAnalytics", "v2", credentials=creds)
+    
+    # 1. Channel Info
+    c_info = fetch_channel_info(youtube)
+    if not c_info:
+        print("Channel Not Found.")
+        return
         
-        # 1. Fetch
-        c_stats = fetch_channel_stats(youtube)
-        if not c_stats:
-            print("Failed to fetch channel stats.")
-            return
-
-        a_stats = fetch_analytics(analytics)
-        top_v = fetch_top_videos(analytics, youtube)
-        demo = fetch_demographics(analytics)
-        traffic = fetch_traffic_sources(analytics)
+    cid = c_info['id']
+    # Upsert Channel
+    ch = session.query(Channel).filter_by(id=cid).first()
+    if not ch:
+        ch = Channel(id=cid, name="Loading...")
+        session.add(ch)
+    
+    ch.name = c_info['snippet']['title']
+    ch.profil_image = c_info['snippet']['thumbnails']['default']['url']
+    ch.last_updated = datetime.datetime.utcnow()
+    session.commit()
+    
+    # 2. Scope Determination
+    today = datetime.date.today()
+    if args.init:
+        print("!!! INITIALIZATION MODE: Fetching 3 Years of History !!!")
+        start_date = (today - relativedelta(years=3)).strftime(DATE_FORMAT)
+    else:
+        print("--- SYNC MODE: Fetching 30 Days ---")
+        start_date = (today - datetime.timedelta(days=30)).strftime(DATE_FORMAT)
         
-        # 2. Save
-        channel_id = save_to_db(c_stats, a_stats, top_v)
-        
-        # 3. Generate
-        generate_dashboard_json(channel_id, top_v, demo, traffic)
-        
-    except Exception as e:
-        print(f"FATAL ERROR: {e}")
-        import traceback
-        traceback.print_exc()
-
+    end_date = (today - datetime.timedelta(days=3)).strftime(DATE_FORMAT) # T-3 safety
+    
+    # 3. Channel Daily Stats
+    res = fetch_channel_daily(analytics, start_date, end_date)
+    upsert_channel_stats(session, ch, res)
+    session.commit()
+    
+    # 4. Videos List (Fetch ALL if init, or maybe just check for new ones? Fetch ALL is safer)
+    videos = fetch_all_videos(youtube, cid)
+    upsert_videos(session, cid, videos)
+    session.commit()
+    
+    # 5. Video Daily Stats (Iterate)
+    print(f"Syncing daily stats for {len(videos)} videos...")
+    for i, v in enumerate(videos):
+        # Progress indicator
+        if i % 10 == 0: print(f"Processing {i}/{len(videos)}: {v['title'][:20]}...")
+        v_res = fetch_video_daily(analytics, v['id'], start_date, end_date)
+        upsert_video_daily(session, v['id'], v_res)
+        if i % 20 == 0: session.commit() # Commit periodically
+    session.commit()
+    
+    # 6. Demographics & Traffic
+    # Note: Demographics/Geo are now Aggregates. We store them using the end_date as the snapshot key.
+    snapshot_date = datetime.datetime.strptime(end_date, DATE_FORMAT).date()
+    
+    # Age
+    upsert_demographics_age(session, fetch_demographics_daily(analytics, start_date, end_date, "ageGroup"), snapshot_date)
+    # Gender
+    upsert_demographics_gender(session, fetch_demographics_daily(analytics, start_date, end_date, "gender"), snapshot_date)
+    # Country
+    upsert_geography(session, fetch_demographics_daily(analytics, start_date, end_date, "country"), snapshot_date)
+    
+    # Traffic (Daily supported)
+    upsert_traffic(session, fetch_traffic_daily(analytics, start_date, end_date))
+    session.commit()
+    
+    print("Data Sync Complete.")
+    
+    # 7. Generate JSON
+    generate_frontend_json(session, cid)
+    
 if __name__ == "__main__":
     main()

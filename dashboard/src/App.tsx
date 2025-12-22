@@ -68,16 +68,22 @@ const App: React.FC = () => {
             if (timeRange === 'Monthly') source = data.trends.monthly;
 
             // Process Chart Data
-            const dates = source.dates;
+            // Process Chart Data
+            // [FIX] Support both 'dates' (legacy) and 'day' (new DB) keys
+            const dates = source.dates || (source as any).day;
             const views = source.views;
-            const subs = source.subscribers;
-            const revenue = source.revenue;
+            const subs = source.subscribers || (source as any).subscribersGained;
+            const revenue = source.revenue || (source as any).estimatedRevenue; // Support different naming
             const likes = (source as any).likes || [];
             const dislikes = (source as any).dislikes || [];
             const avgDuration = (source as any).averageViewDuration || [];
             const comments = (source as any).comments || [];
 
-            if (!dates) return;
+            if (!dates) {
+                console.error("No dates found in source data:", source);
+                setLoadingData(false);
+                return;
+            }
 
             // Calculate Totals for Stats Cards
             const totalViews = views.reduce((a, b) => a + b, 0);
