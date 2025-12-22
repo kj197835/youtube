@@ -26,6 +26,7 @@ const App: React.FC = () => {
     const [videoLimit, setVideoLimit] = useState<number | 'ALL'>(10);
     const [selectedMetric, setSelectedMetric] = useState<'views' | 'likes' | 'dislikes' | 'watchTime' | 'subscribers' | 'revenue'>('views');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [legalModal, setLegalModal] = useState<'privacy' | 'tos' | null>(null);
 
     // Data State
     const [stats, setStats] = useState<ChannelStats | null>(null);
@@ -430,13 +431,87 @@ const App: React.FC = () => {
 
             <footer className="border-t border-gray-200 bg-white mt-auto">
                 <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <p className="text-sm text-gray-500">© 2024 CreatorPulse. All rights reserved.</p>
+                    <p className="text-sm text-gray-500">© 2024 AI Sound Lab. All rights reserved.</p>
                     <div className="flex items-center gap-6 text-sm text-gray-500">
-                        <a href="#" className="hover:text-gray-900">Privacy Policy</a>
-                        <a href="#" className="hover:text-gray-900">Terms of Service</a>
+                        <button onClick={() => setLegalModal('privacy')} className="hover:text-gray-900 transition-colors">Privacy Policy</button>
+                        <button onClick={() => setLegalModal('tos')} className="hover:text-gray-900 transition-colors">Terms of Service</button>
                     </div>
                 </div>
             </footer>
+
+            {/* Legal Modal */}
+            {legalModal && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setLegalModal(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                            <h3 className="text-2xl font-bold text-gray-900">
+                                {legalModal === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}
+                            </h3>
+                            <button
+                                onClick={() => setLegalModal(null)}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="p-6 md:p-8 text-gray-600 space-y-4 leading-relaxed overflow-y-auto">
+                            {legalModal === 'privacy' ? (
+                                <>
+                                    <p className="font-semibold text-gray-900">Last updated: December 21, 2024</p>
+                                    <p>At AI Sound Lab ("we," "our," or "us"), we value your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our YouTube Analytics Dashboard (the "Service").</p>
+
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">1. Information We Collect</h4>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li><strong>YouTube Data:</strong> We access public and private channel data (views, subscribers, revenue, etc.) via the YouTube Data API and Analytics API.</li>
+                                        <li><strong>Usage Data:</strong> We may collect anonymous usage statistics to improve the dashboard performance.</li>
+                                        <li><strong>Cookies:</strong> We use local storage to save your dashboard preferences (e.g., time range selection).</li>
+                                    </ul>
+
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">2. How We Use Information</h4>
+                                    <p>We use the collected data solely to:</p>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>Access and display your channel's performance metrics.</li>
+                                        <li>Provide AI-driven insights and predictions.</li>
+                                        <li>Maintain and improve the stability of the Service.</li>
+                                    </ul>
+
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">3. Data Sharing & Third Parties</h4>
+                                    <p>We do not sell your personal data. Data is shared only with:</p>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li><strong>Google/YouTube:</strong> To fetch analytics data (subject to Google's Privacy Policy).</li>
+                                        <li><strong>AI Providers:</strong> Anonymized metrics may be processed by AI models (e.g., Google Gemini) to generate insights.</li>
+                                    </ul>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="font-semibold text-gray-900">Effective Date: December 21, 2024</p>
+                                    <p>Welcome to AI Sound Lab. By accessing or using our Dashboard, you agree to be bound by these Terms of Service.</p>
+
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">1. Use of Service</h4>
+                                    <p>You agree to use this Service only for lawful purposes relevant to monitoring and analyzing YouTube channel content. You must not use this Service to violate YouTube's Terms of Service or any applicable laws.</p>
+
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">2. API Clients</h4>
+                                    <p>This Service uses YouTube API Services. By using this Service, you are also bound by the YouTube Terms of Service (<a href="https://www.youtube.com/t/terms" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">https://www.youtube.com/t/terms</a>) and Google Privacy Policy.</p>
+
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">3. Disclaimer of Warranties</h4>
+                                    <p>The Service is provided "AS IS" and "AS AVAILABLE" without any warranties of any kind. We do not guarantee that the data predictions will be 100% accurate or that the Service will be uninterrupted.</p>
+
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">4. Limitation of Liability</h4>
+                                    <p>In no event shall AI Sound Lab be liable for any indirect, incidental, special, or consequential damages arising out of your use of the Service.</p>
+                                </>
+                            )}
+                        </div>
+                        <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end">
+                            <button
+                                onClick={() => setLegalModal(null)}
+                                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Image Modal */}
             {selectedImage && (
