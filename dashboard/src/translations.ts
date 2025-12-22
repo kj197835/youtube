@@ -10,10 +10,17 @@ export const translations = {
         // Navigation
         nav: {
             dashboard: "Dashboard",
-            content: "Content",
+            content: "Contents",
             analytics: "Analytics",
             earn: "Earn",
             customization: "Customization"
+        },
+
+        // Subtitles for each section
+        subtitles: {
+            dashboard: "Manage your channel performance and strategy.",
+            contents: "Manage and optimize your video library and metadata.",
+            analytics: "Leverage AI-driven predictions to forecast trends and strategically grow your channel."
         },
 
         // Time Ranges
@@ -84,8 +91,8 @@ export const translations = {
         legal: {
             privacyTitle: "Privacy Policy",
             tosTitle: "Terms of Service",
-            lastUpdated: "Last updated: December 21, 2024",
-            effectiveDate: "Effective Date: December 21, 2024",
+            lastUpdated: "Last updated: December 21, 2025",
+            effectiveDate: "Effective Date: December 21, 2025",
 
             // Privacy Content (Simplified for variable insertion)
             privacyIntro: 'At AI Sound Lab ("we," "our," or "us"), we value your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our YouTube Analytics Dashboard (the "Service").',
@@ -136,6 +143,13 @@ export const translations = {
             analytics: "분석",
             earn: "수익 창출",
             customization: "맞춤 설정"
+        },
+
+        // Subtitles for each section
+        subtitles: {
+            dashboard: "채널 성과 분석 및 전략 관리",
+            contents: "동영상 라이브러리 및 메타데이터를 효율적으로 관리하세요.",
+            analytics: "AI 기반 예측을 활용하여 트렌드를 파악하고 채널을 전략적으로 성장시키세요."
         },
 
         // Time Ranges
@@ -206,8 +220,8 @@ export const translations = {
         legal: {
             privacyTitle: "개인정보처리방침",
             tosTitle: "이용약관",
-            lastUpdated: "최종 업데이트: 2024년 12월 21일",
-            effectiveDate: "시행일: 2024년 12월 21일",
+            lastUpdated: "최종 업데이트: 2025년 12월 21일",
+            effectiveDate: "시행일: 2025년 12월 21일",
 
             // Privacy Content
             privacyIntro: 'AI 사운드 랩(이하 "회사")은 귀하의 개인정보를 소중하게 생각합니다. 본 방침은 귀하가 YouTube 분석 대시보드("서비스")를 이용할 때 수집되는 정보와 그 보호 방법을 설명합니다.',

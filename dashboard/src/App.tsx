@@ -424,7 +424,12 @@ const App: React.FC = () => {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
                         <h2 className="text-4xl font-black text-gray-900 tracking-tight">{t.nav[activeTab.toLowerCase() as keyof typeof t.nav] || activeTab}</h2>
-                        <p className="text-gray-500 font-medium mt-1">{t.subtitle}</p>
+                        <p className="text-gray-500 font-medium mt-1">
+                            {activeTab === 'Dashboard' ? t.subtitles.dashboard :
+                                activeTab === 'Content' ? t.subtitles.contents :
+                                    activeTab === 'Analytics' ? t.subtitles.analytics :
+                                        t.subtitles.dashboard}
+                        </p>
                         {stats?.lastUpdated && (
                             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
