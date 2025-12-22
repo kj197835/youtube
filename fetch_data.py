@@ -369,6 +369,7 @@ def generate_frontend_json(session, channel_id):
     total_rev = sum(s.estimated_revenue for s in stats_30d)
     total_subs = sum(s.subscribers_gained for s in stats_30d)
     total_wt = sum(s.watch_time_minutes for s in stats_30d) / 60
+    total_likes = sum(s.likes for s in stats_30d)
     
     summary = {
         "channel_name": channel.name if channel else "Unknown",
@@ -377,6 +378,7 @@ def generate_frontend_json(session, channel_id):
         "estimated_revenue_30d": round(total_rev, 2),
         "subs_gained_30d": total_subs,
         "total_watch_time_hours_30d": int(total_wt),
+        "likes_30d": total_likes,
         "avg_engagement_rate_30d": 0.0, # Placeholder
         "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
@@ -392,7 +394,8 @@ def generate_frontend_json(session, channel_id):
         'subscribers': s.subscribers_gained,
         'likes': s.likes,
         'comments': s.comments,
-        'averageViewDuration': s.avg_view_duration_seconds
+        'averageViewDuration': s.avg_view_duration_seconds,
+        'estimatedMinutesWatched': s.watch_time_minutes
     } for s in all_stats])
     
     if df.empty:

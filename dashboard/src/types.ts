@@ -5,7 +5,8 @@ export interface ChannelStats {
     watchTimeHours: number;
     avgEngagementRate: number;
     profileImage?: string;
-    revenue: number; // Added
+    revenue: number;
+    likes: number; // Added
     lastUpdated?: string;
 }
 
@@ -16,8 +17,8 @@ export interface VideoData {
     publishedAt: string;
     views: number;
     likes: number;
-    dislikes: number; // Added
-    revenue: number; // Added
+    dislikes: number;
+    revenue: number;
     comments: number;
     retentionRate: number;
     status: 'Public' | 'Unlisted' | 'Private';
@@ -61,7 +62,8 @@ export interface DashboardData {
         estimated_revenue_30d: number;
         subs_gained_30d: number;
         total_watch_time_hours_30d?: number;
-        avg_engagement_rate_30d?: number; // Added field
+        likes_30d?: number; // Added
+        avg_engagement_rate_30d?: number;
         last_updated: string;
     };
     trends: {
@@ -99,4 +101,5 @@ export interface TrendData {
     revenue: number[];
     subscribers: number[];
     averageViewDuration: number[];
+    estimatedMinutesWatched: number[];
 }
