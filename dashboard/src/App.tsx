@@ -34,6 +34,14 @@ const App: React.FC = () => {
 
     const [insights, setInsights] = useState<AIInsight[]>([]);
     const [loadingData, setLoadingData] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -208,7 +216,7 @@ const App: React.FC = () => {
                             <div className="h-[65vw] sm:h-[400px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     {chartType === 'Daily' ? (
-                                        <BarChart data={displayChartData}>
+                                        <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
                                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
@@ -216,7 +224,7 @@ const App: React.FC = () => {
                                             <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
                                         </BarChart>
                                     ) : (
-                                        <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                        <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
                                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
@@ -335,7 +343,7 @@ const App: React.FC = () => {
                                 <div className="h-[65vw] sm:h-[400px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         {chartType === 'Daily' ? (
-                                            <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
                                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
@@ -343,7 +351,7 @@ const App: React.FC = () => {
                                                 <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
                                             </BarChart>
                                         ) : (
-                                            <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
                                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
