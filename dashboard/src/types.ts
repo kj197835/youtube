@@ -6,6 +6,7 @@ export interface ChannelStats {
     avgEngagementRate: number;
     profileImage?: string;
     revenue: number; // Added
+    lastUpdated?: string;
 }
 
 export interface VideoData {

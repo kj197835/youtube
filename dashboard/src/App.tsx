@@ -91,7 +91,8 @@ const App: React.FC = () => {
                 watchTimeHours: Math.round(totalWatchTimeHours),
                 avgEngagementRate: parseFloat(engagementRate.toFixed(2)),
                 profileImage: profileImage,
-                revenue: totalRevenue
+                revenue: totalRevenue,
+                lastUpdated: data.summary.last_updated
             };
 
             setStats(calculatedStats);
@@ -215,7 +216,7 @@ const App: React.FC = () => {
                                             <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
                                         </BarChart>
                                     ) : (
-                                        <AreaChart data={displayChartData}>
+                                        <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
                                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
@@ -334,7 +335,7 @@ const App: React.FC = () => {
                                 <div className="h-[65vw] sm:h-[400px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         {chartType === 'Daily' ? (
-                                            <BarChart data={displayChartData}>
+                                            <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
                                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
@@ -342,7 +343,7 @@ const App: React.FC = () => {
                                                 <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
                                             </BarChart>
                                         ) : (
-                                            <AreaChart data={displayChartData}>
+                                            <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
                                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
@@ -394,6 +395,12 @@ const App: React.FC = () => {
                     <div>
                         <h2 className="text-4xl font-black text-gray-900 tracking-tight">{activeTab}</h2>
                         <p className="text-gray-500 font-medium mt-1">Manage your channel performance and strategy.</p>
+                        {stats?.lastUpdated && (
+                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                Last updated: {stats.lastUpdated}
+                            </p>
+                        )}
                     </div>
 
                     {activeTab !== 'Earn' && activeTab !== 'Customization' && (
