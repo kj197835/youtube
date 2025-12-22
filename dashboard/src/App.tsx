@@ -4,8 +4,9 @@ import { ChannelStats, VideoData, AIInsight, ChartData, AppTab, DashboardData } 
 import { getCreatorInsights } from './services/geminiService';
 import StatsCard from './components/StatsCard';
 import InsightSection from './components/InsightSection';
+import { translations, Language } from './translations';
 
-const NavItem: React.FC<{ label: AppTab; active: boolean; onClick: () => void; icon: React.ReactNode }> = ({ label, active, onClick, icon }) => (
+const NavItem: React.FC<{ label: string; active: boolean; onClick: () => void; icon: React.ReactNode }> = ({ label, active, onClick, icon }) => (
     <button
         onClick={onClick}
         className={`relative flex items-center gap-2 px-2 sm:px-4 py-4 text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${active ? 'text-red-600' : 'text-gray-500 hover:text-gray-900'
@@ -27,6 +28,9 @@ const App: React.FC = () => {
     const [selectedMetric, setSelectedMetric] = useState<'views' | 'likes' | 'dislikes' | 'watchTime' | 'subscribers' | 'revenue'>('views');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [legalModal, setLegalModal] = useState<'privacy' | 'tos' | null>(null);
+    const [language, setLanguage] = useState<Language>('en');
+
+    const t = translations[language]; // Convenience accessor
 
     // Data State
     const [stats, setStats] = useState<ChannelStats | null>(null);
@@ -171,22 +175,22 @@ const App: React.FC = () => {
     const displayChartData = getDisplayChartData();
 
     const renderContent = () => {
-        if (loadingData) return <div className="p-20 text-center text-gray-400">Loading Dashboard Data...</div>;
+        if (loadingData) return <div className="p-20 text-center text-gray-400">{t.loading}</div>;
 
         switch (activeTab) {
             case 'Dashboard':
                 return (
                     <div className="space-y-8">
                         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                            <StatsCard label={`Subscribers ${rangeLabel}`} value={stats?.subscriberCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>} />
-                            <StatsCard label={`Total Views ${rangeLabel}`} value={stats?.viewCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>} />
-                            <StatsCard label={`Revenue ${rangeLabel}`} value={`$${stats?.revenue.toFixed(2) || '0.00'}`} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
-                            <StatsCard label="Watch Time (Hrs)" value={stats?.watchTimeHours.toLocaleString() || '-'} change="-" isPositive={false} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
-                            <StatsCard label="Engagement Rate" value={`${stats?.avgEngagementRate}%`} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>} />
+                            <StatsCard label={`${t.stats.subscribers} ${rangeLabel}`} value={stats?.subscriberCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>} />
+                            <StatsCard label={`${t.stats.views} ${rangeLabel}`} value={stats?.viewCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>} />
+                            <StatsCard label={`${t.stats.revenue} ${rangeLabel}`} value={`$${stats?.revenue.toFixed(2) || '0.00'}`} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
+                            <StatsCard label={t.stats.watchTime} value={stats?.watchTimeHours.toLocaleString() || '-'} change="-" isPositive={false} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
+                            <StatsCard label={t.stats.engagement} value={`${stats?.avgEngagementRate}%`} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>} />
                         </div>
                         <div className="bg-white p-4 sm:p-8 rounded-3xl border border-gray-100 shadow-sm min-h-0 sm:min-h-[500px]">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-gray-900">Growth ({timeRange})</h3>
+                                <h3 className="text-xl font-bold text-gray-900">{t.sections.growth} ({timeRange})</h3>
                                 <div className="flex items-center gap-3">
                                     <div className="relative inline-block text-left">
                                         <select
@@ -194,12 +198,12 @@ const App: React.FC = () => {
                                             onChange={(e) => setSelectedMetric(e.target.value as any)}
                                             className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer capitalize"
                                         >
-                                            <option value="views">Views</option>
-                                            <option value="watchTime">Watch Time</option>
-                                            <option value="subscribers">Subscribers</option>
-                                            <option value="revenue">Revenue</option>
-                                            <option value="likes">Likes</option>
-                                            <option value="dislikes">Dislikes</option>
+                                            <option value="views">{t.metrics.views}</option>
+                                            <option value="watchTime">{t.metrics.watchTime}</option>
+                                            <option value="subscribers">{t.metrics.subscribers}</option>
+                                            <option value="revenue">{t.metrics.revenue}</option>
+                                            <option value="likes">{t.metrics.likes}</option>
+                                            <option value="dislikes">{t.metrics.dislikes}</option>
                                         </select>
                                     </div>
                                     <div className="relative inline-block text-left">
@@ -208,8 +212,8 @@ const App: React.FC = () => {
                                             onChange={(e) => setChartType(e.target.value as any)}
                                             className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer"
                                         >
-                                            <option value="Daily">Changes</option>
-                                            <option value="Cumulative">Cumulative</option>
+                                            <option value="Daily">{t.chartType.changes}</option>
+                                            <option value="Cumulative">{t.chartType.cumulative}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -237,14 +241,14 @@ const App: React.FC = () => {
                             </div>
                         </div>
 
-                        <InsightSection insights={insights} />
+                        <InsightSection insights={insights} title={t.sections.aiInsights} />
                     </div>
                 );
             case 'Content':
                 return (
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-                            <h3 className="font-bold text-lg text-gray-900">Top Videos</h3>
+                            <h3 className="font-bold text-lg text-gray-900">{t.sections.topVideos}</h3>
                             <div className="relative inline-block text-left">
                                 <select
                                     value={videoLimit}
@@ -257,7 +261,7 @@ const App: React.FC = () => {
                                     <option value={10}>10</option>
                                     <option value={50}>50</option>
                                     <option value={100}>100</option>
-                                    <option value="ALL">ALL</option>
+                                    <option value="ALL">{t.videoLimit.all}</option>
                                 </select>
                             </div>
                         </div>
@@ -265,13 +269,13 @@ const App: React.FC = () => {
                             <table className="w-full text-left">
                                 <thead className="bg-gray-50 text-gray-500 text-[10px] font-bold uppercase tracking-wider">
                                     <tr>
-                                        <th className="px-4 py-3 text-gray-900 w-[50px]">Image</th>
-                                        <th className="px-4 py-3 text-gray-900 w-[40%]">Video</th>
-                                        <th className="px-4 py-3 text-gray-900">ID</th>
-                                        <th className="px-4 py-3 text-gray-900">Views</th>
-                                        <th className="px-4 py-3 text-gray-900">Likes</th>
-                                        <th className="px-4 py-3 text-gray-900">Dislikes</th>
-                                        <th className="px-4 py-3 text-gray-900">Revenue</th>
+                                        <th className="px-4 py-3 text-gray-900 w-[50px]">{t.table.image}</th>
+                                        <th className="px-4 py-3 text-gray-900 w-[40%]">{t.table.video}</th>
+                                        <th className="px-4 py-3 text-gray-900">{t.table.id}</th>
+                                        <th className="px-4 py-3 text-gray-900">{t.table.views}</th>
+                                        <th className="px-4 py-3 text-gray-900">{t.table.likes}</th>
+                                        <th className="px-4 py-3 text-gray-900">{t.table.dislikes}</th>
+                                        <th className="px-4 py-3 text-gray-900">{t.table.revenue}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 text-[11px]">
@@ -305,7 +309,7 @@ const App: React.FC = () => {
                     <div className="space-y-6">
                         <div className="bg-white p-4 sm:p-8 rounded-3xl border border-gray-100 shadow-sm min-h-0 sm:min-h-[500px]">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-gray-900">Detailed Analytics ({timeRange})</h3>
+                                <h3 className="text-xl font-bold text-gray-900">{t.sections.detailedAnalytics} ({timeRange})</h3>
                                 <div className="flex items-center gap-3">
                                     <div className="relative inline-block text-left">
                                         <select
@@ -313,12 +317,12 @@ const App: React.FC = () => {
                                             onChange={(e) => setSelectedMetric(e.target.value as any)}
                                             className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer capitalize"
                                         >
-                                            <option value="views">Views</option>
-                                            <option value="watchTime">Watch Time</option>
-                                            <option value="subscribers">Subscribers</option>
-                                            <option value="revenue">Revenue</option>
-                                            <option value="likes">Likes</option>
-                                            <option value="dislikes">Dislikes</option>
+                                            <option value="views">{t.metrics.views}</option>
+                                            <option value="watchTime">{t.metrics.watchTime}</option>
+                                            <option value="subscribers">{t.metrics.subscribers}</option>
+                                            <option value="revenue">{t.metrics.revenue}</option>
+                                            <option value="likes">{t.metrics.likes}</option>
+                                            <option value="dislikes">{t.metrics.dislikes}</option>
                                         </select>
                                     </div>
                                     <div className="relative inline-block text-left">
@@ -327,8 +331,8 @@ const App: React.FC = () => {
                                             onChange={(e) => setChartType(e.target.value as any)}
                                             className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer"
                                         >
-                                            <option value="Daily">Changes</option>
-                                            <option value="Cumulative">Cumulative</option>
+                                            <option value="Daily">{t.chartType.changes}</option>
+                                            <option value="Cumulative">{t.chartType.cumulative}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -367,8 +371,7 @@ const App: React.FC = () => {
                         <InsightSection insights={insights} title="AI Prediction Insights" />
                     </div>
                 );
-            default:
-                return <div className="p-20 text-center text-gray-400">Section coming soon...</div>;
+                return <div className="p-20 text-center text-gray-400">{t.sectionComingSoon}</div>;
         }
     };
 
@@ -380,34 +383,52 @@ const App: React.FC = () => {
                         <div className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center rotate-3 shadow-md shadow-red-100">
                             <svg className="text-white w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
                         </div>
-                        <h1 className="text-xl font-black text-gray-900 tracking-tighter hidden sm:block">AI Sound Lab</h1>
+                        <h1 className="text-xl font-black text-gray-900 tracking-tighter hidden sm:block">{t.title}</h1>
                     </div>
 
                     <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
-                        <NavItem label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} icon={null} />
-                        <NavItem label="Content" active={activeTab === 'Content'} onClick={() => setActiveTab('Content')} icon={null} />
-                        <NavItem label="Analytics" active={activeTab === 'Analytics'} onClick={() => setActiveTab('Analytics')} icon={null} />
+                        <NavItem label={t.nav.dashboard} active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} icon={null} />
+                        <NavItem label={t.nav.content} active={activeTab === 'Content'} onClick={() => setActiveTab('Content')} icon={null} />
+                        <NavItem label={t.nav.analytics} active={activeTab === 'Analytics'} onClick={() => setActiveTab('Analytics')} icon={null} />
                     </nav>
 
-                    <div className="w-10 h-10 rounded-xl bg-gray-200 overflow-hidden shadow-md">
-                        <img
-                            src="AI_SOUND_LAB1.png"
-                            alt="AI Sound Lab"
-                            className="w-full h-full object-cover"
-                        />
+                    <div className="flex items-center gap-4">
+                        {/* Language Selector */}
+                        <div className="relative">
+                            <select
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value as Language)}
+                                className="appearance-none bg-gray-100 pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer hover:bg-gray-200 transition-colors"
+                            >
+                                <option value="en">English</option>
+                                <option value="kr">한국어</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                            </div>
+                        </div>
+
+                        <div className="w-10 h-10 rounded-xl bg-gray-200 overflow-hidden shadow-md">
+                            <img
+                                src="AI_SOUND_LAB1.png"
+                                alt={t.title}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
                     </div>
                 </div>
             </header>
 
+
             <main className="flex-1 max-w-[1600px] mx-auto w-full p-6 lg:p-12 space-y-10">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h2 className="text-4xl font-black text-gray-900 tracking-tight">{activeTab}</h2>
-                        <p className="text-gray-500 font-medium mt-1">Manage your channel performance and strategy.</p>
+                        <h2 className="text-4xl font-black text-gray-900 tracking-tight">{t.nav[activeTab.toLowerCase() as keyof typeof t.nav] || activeTab}</h2>
+                        <p className="text-gray-500 font-medium mt-1">{t.subtitle}</p>
                         {stats?.lastUpdated && (
                             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                Last updated: {stats.lastUpdated}
+                                {t.lastUpdated} {stats.lastUpdated}
                             </p>
                         )}
                     </div>
@@ -419,9 +440,9 @@ const App: React.FC = () => {
                                 onChange={(e) => setTimeRange(e.target.value as any)}
                                 className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-white border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer"
                             >
-                                <option value="Daily">Last 30 Days</option>
-                                <option value="Weekly">Last 30 Weeks</option>
-                                <option value="Monthly">Last 30 Months</option>
+                                <option value="Daily">{t.timeRange.daily}</option>
+                                <option value="Weekly">{t.timeRange.weekly}</option>
+                                <option value="Monthly">{t.timeRange.monthly}</option>
                             </select>
                         </div>
                     )}
@@ -431,10 +452,10 @@ const App: React.FC = () => {
 
             <footer className="border-t border-gray-200 bg-white mt-auto">
                 <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <p className="text-sm text-gray-500">© 2024 AI Sound Lab. All rights reserved.</p>
+                    <p className="text-sm text-gray-500">{t.footer.copyright}</p>
                     <div className="flex items-center gap-6 text-sm text-gray-500">
-                        <button onClick={() => setLegalModal('privacy')} className="hover:text-gray-900 transition-colors">Privacy Policy</button>
-                        <button onClick={() => setLegalModal('tos')} className="hover:text-gray-900 transition-colors">Terms of Service</button>
+                        <button onClick={() => setLegalModal('privacy')} className="hover:text-gray-900 transition-colors">{t.footer.privacy}</button>
+                        <button onClick={() => setLegalModal('tos')} className="hover:text-gray-900 transition-colors">{t.footer.tos}</button>
                     </div>
                 </div>
             </footer>
@@ -445,7 +466,7 @@ const App: React.FC = () => {
                     <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
                             <h3 className="text-2xl font-bold text-gray-900">
-                                {legalModal === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}
+                                {legalModal === 'privacy' ? t.legal.privacyTitle : t.legal.tosTitle}
                             </h3>
                             <button
                                 onClick={() => setLegalModal(null)}
@@ -457,47 +478,42 @@ const App: React.FC = () => {
                         <div className="p-6 md:p-8 text-gray-600 space-y-4 leading-relaxed overflow-y-auto">
                             {legalModal === 'privacy' ? (
                                 <>
-                                    <p className="font-semibold text-gray-900">Last updated: December 21, 2024</p>
-                                    <p>At AI Sound Lab ("we," "our," or "us"), we value your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our YouTube Analytics Dashboard (the "Service").</p>
+                                    <p className="font-semibold text-gray-900">{t.legal.lastUpdated}</p>
+                                    <p>{t.legal.privacyIntro}</p>
 
-                                    <h4 className="text-lg font-bold text-gray-900 pt-4">1. Information We Collect</h4>
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">{t.legal.privacySection1}</h4>
                                     <ul className="list-disc pl-5 space-y-1">
-                                        <li><strong>YouTube Data:</strong> We access public and private channel data (views, subscribers, revenue, etc.) via the YouTube Data API and Analytics API.</li>
-                                        <li><strong>Usage Data:</strong> We may collect anonymous usage statistics to improve the dashboard performance.</li>
-                                        <li><strong>Cookies:</strong> We use local storage to save your dashboard preferences (e.g., time range selection).</li>
+                                        {t.legal.privacyList1.map((item, i) => <li key={i}>{item}</li>)}
                                     </ul>
 
-                                    <h4 className="text-lg font-bold text-gray-900 pt-4">2. How We Use Information</h4>
-                                    <p>We use the collected data solely to:</p>
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">{t.legal.privacySection2}</h4>
+                                    <p>{t.legal.privacyIntro2}</p>
                                     <ul className="list-disc pl-5 space-y-1">
-                                        <li>Access and display your channel's performance metrics.</li>
-                                        <li>Provide AI-driven insights and predictions.</li>
-                                        <li>Maintain and improve the stability of the Service.</li>
+                                        {t.legal.privacyList2.map((item, i) => <li key={i}>{item}</li>)}
                                     </ul>
 
-                                    <h4 className="text-lg font-bold text-gray-900 pt-4">3. Data Sharing & Third Parties</h4>
-                                    <p>We do not sell your personal data. Data is shared only with:</p>
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">{t.legal.privacySection3}</h4>
+                                    <p>{t.legal.privacyIntro3}</p>
                                     <ul className="list-disc pl-5 space-y-1">
-                                        <li><strong>Google/YouTube:</strong> To fetch analytics data (subject to Google's Privacy Policy).</li>
-                                        <li><strong>AI Providers:</strong> Anonymized metrics may be processed by AI models (e.g., Google Gemini) to generate insights.</li>
+                                        {t.legal.privacyList3.map((item, i) => <li key={i}>{item}</li>)}
                                     </ul>
                                 </>
                             ) : (
                                 <>
-                                    <p className="font-semibold text-gray-900">Effective Date: December 21, 2024</p>
-                                    <p>Welcome to AI Sound Lab. By accessing or using our Dashboard, you agree to be bound by these Terms of Service.</p>
+                                    <p className="font-semibold text-gray-900">{t.legal.effectiveDate}</p>
+                                    <p>{t.legal.tosIntro}</p>
 
-                                    <h4 className="text-lg font-bold text-gray-900 pt-4">1. Use of Service</h4>
-                                    <p>You agree to use this Service only for lawful purposes relevant to monitoring and analyzing YouTube channel content. You must not use this Service to violate YouTube's Terms of Service or any applicable laws.</p>
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">{t.legal.tosSection1}</h4>
+                                    <p>{t.legal.tosContent1}</p>
 
-                                    <h4 className="text-lg font-bold text-gray-900 pt-4">2. API Clients</h4>
-                                    <p>This Service uses YouTube API Services. By using this Service, you are also bound by the YouTube Terms of Service (<a href="https://www.youtube.com/t/terms" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">https://www.youtube.com/t/terms</a>) and Google Privacy Policy.</p>
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">{t.legal.tosSection2}</h4>
+                                    <p dangerouslySetInnerHTML={{ __html: t.legal.tosContent2.replace('https://www.youtube.com/t/terms', '<a href="https://www.youtube.com/t/terms" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline">https://www.youtube.com/t/terms</a>') }} />
 
-                                    <h4 className="text-lg font-bold text-gray-900 pt-4">3. Disclaimer of Warranties</h4>
-                                    <p>The Service is provided "AS IS" and "AS AVAILABLE" without any warranties of any kind. We do not guarantee that the data predictions will be 100% accurate or that the Service will be uninterrupted.</p>
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">{t.legal.tosSection3}</h4>
+                                    <p>{t.legal.tosContent3}</p>
 
-                                    <h4 className="text-lg font-bold text-gray-900 pt-4">4. Limitation of Liability</h4>
-                                    <p>In no event shall AI Sound Lab be liable for any indirect, incidental, special, or consequential damages arising out of your use of the Service.</p>
+                                    <h4 className="text-lg font-bold text-gray-900 pt-4">{t.legal.tosSection4}</h4>
+                                    <p>{t.legal.tosContent4}</p>
                                 </>
                             )}
                         </div>
@@ -506,7 +522,7 @@ const App: React.FC = () => {
                                 onClick={() => setLegalModal(null)}
                                 className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                             >
-                                Close
+                                {t.footer.close}
                             </button>
                         </div>
                     </div>
