@@ -35,6 +35,6 @@ cp -r dashboard/dist/* .
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
 git add -f data/*.csv dashboard_data.json database.py fetch_data.py auto_update.sh index.html assets/ thumbnails/ AI_SOUND_LAB1.png
 git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
-git push origin yt-upgrade >> "$LOG_FILE" 2>&1
+git push origin main >> "$LOG_FILE" 2>&1
 
 echo "[$DATE] Update completed." >> "$LOG_FILE"
