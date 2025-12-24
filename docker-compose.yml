@@ -12,6 +12,7 @@ services:
       - /Users/a1234/.ssh:/root/.ssh:ro # For Git Push (Optional)
     environment:
       - PYTHONUNBUFFERED=1
+      - TZ=Asia/Seoul
     # Keep container running for exec or cron usage if needed, or run once.
     # For initial auth, we run specifically instructions.
     command: python fetch_data.py
@@ -26,4 +27,6 @@ services:
       - ./dashboard:/app
       - /app/node_modules
       - ./dashboard_data.json:/app/public/dashboard_data.json
+    environment:
+      - TZ=Asia/Seoul
     command: sh -c "npm install && npm run dev -- --host"

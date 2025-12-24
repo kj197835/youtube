@@ -3,7 +3,8 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install git for the automation script (push to github)
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git tzdata && rm -rf /var/lib/apt/lists/*
+ENV TZ=Asia/Seoul
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
