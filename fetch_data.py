@@ -27,10 +27,13 @@ OLLAMA_API_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.1"
 
 # TODO: Add your competitor channel IDs here
+# TODO: Add your competitor channel IDs here
 # Example: UC..., UC...
 COMPETITOR_CHANNEL_IDS = [
     "UCSJ4gkVC6NrvII8umztf0Ow", # Lofi Girl
     "UC_aEa8K-EOJ3D6gOs7HcyNg", # NoCopyrightSounds
+    "UC0FiLCwZZPqaVHUPz72Cr-A", # Chillhop Music
+    "UCWzZ5TIGoZ6o-vpMwTuMWog", # College Music
 ]
 
 # --- Auth ---
@@ -489,15 +492,22 @@ def analyze_with_ollama(session, my_channel_id):
     {comp_text}
     
     Output Requirement:
-    Return a single valid JSON object with exactly these keys: "strengths", "improvements", "action_plan".
-    Each key must have an object with "title" (short, max 10 chars) and "content" (1-2 sentences).
+    Return a single valid JSON object with exactly these keys: "strengths", "improvements", "action_plan", "detailed_report".
+    1. "strengths", "improvements", "action_plan": Object with "title" (short, max 10 chars) and "content" (1-2 sentences).
+    2. "detailed_report": A comprehensive Markdown string in Korean.
+       - Include specific comparative analysis vs competitors.
+       - Include what works for them (e.g. Chillhop's seasonality).
+       - Actionable bullet points.
+       - Use headers (##), bolding (**), and lists (-).
+    
     Language: Korean (한국어).
     
     JSON Example:
     {{
-      "strengths": {{ "title": "높은 조회수", "content": "최근 30일간 조회수가 상승세입니다." }},
-      "improvements": {{ "title": "구독 전환율", "content": "조회수 대비 구독자 증가가 낮습니다." }},
-      "action_plan": {{ "title": "쇼츠 활용", "content": "유입을 늘리기 위해 인기 곡 커버 쇼츠를 제작하세요." }}
+      "strengths": {{ "title": "...", "content": "..." }},
+      "improvements": {{ "title": "...", "content": "..." }},
+      "action_plan": {{ "title": "...", "content": "..." }},
+      "detailed_report": "## 상세 분석\\n\\n..."
     }}
     """
     
