@@ -23,7 +23,9 @@ from database import (
 # --- Constants ---
 # --- Constants ---
 DATE_FORMAT = "%Y-%m-%d"
-OLLAMA_API_URL = "http://localhost:11434/api/generate"
+DATE_FORMAT = "%Y-%m-%d"
+# Use host.docker.internal for Mac/Windows Docker, or localhost if running natively
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://host.docker.internal:11434/api/generate")
 OLLAMA_MODEL = "llama3.1"
 
 # TODO: Add your competitor channel IDs here
@@ -34,6 +36,8 @@ COMPETITOR_CHANNEL_IDS = [
     "UC_aEa8K-EOJ3D6gOs7HcyNg", # NoCopyrightSounds
     "UC0FiLCwZZPqaVHUPz72Cr-A", # Chillhop Music
     "UCWzZ5TIGoZ6o-vpMwTuMWog", # College Music
+    "UC5nc_ZtjKW1htCVZVRxlQAQ", # MrSuicideSheep
+    "UC3ifMxTEKLV40GhD9i07M8g", # Proximity
 ]
 
 # --- Auth ---
@@ -517,12 +521,13 @@ def analyze_with_ollama(session, my_channel_id):
             "prompt": prompt,
             "stream": False,
             "format": "json"
-        }, timeout=90) # 90s timeout for stability
+        }, timeout=300) # 300s timeout for slower CPUs
         
         if response.status_code == 200:
             res_json = response.json()
             raw_text = res_json.get('response', '{}')
             # Parse the inner JSON string if necessary, Ollama 'json' format usually returns a JSON object in 'response' BUT sometimes it's text.
+            # With "format": "json", it tries to enforce structure.
             # With "format": "json", it tries to enforce structure.
             try:
                 return json.loads(raw_text)
