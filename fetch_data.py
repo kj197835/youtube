@@ -6,6 +6,7 @@ import json
 import pandas as pd
 import shutil
 from dateutil.relativedelta import relativedelta
+import requests # For Ollama
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -15,11 +16,22 @@ import config
 from database import (
     init_db, get_session, engine,
     Channel, ChannelDaily, Video, VideoDaily, Comment,
-    DemographicsAge, DemographicsGender, Geography, TrafficSource
+    DemographicsAge, DemographicsGender, Geography, TrafficSource,
+    CompetitorChannel, CompetitorVideo
 )
 
 # --- Constants ---
+# --- Constants ---
 DATE_FORMAT = "%Y-%m-%d"
+OLLAMA_API_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "llama3.1"
+
+# TODO: Add your competitor channel IDs here
+# Example: UC..., UC...
+COMPETITOR_CHANNEL_IDS = [
+    "UCSJ4gkVC6NrvII8umztf0Ow", # Lofi Girl
+    "UC_aEa8K-EOJ3D6gOs7HcyNg", # NoCopyrightSounds
+]
 
 # --- Auth ---
 def get_credentials():
@@ -349,6 +361,171 @@ def upsert_traffic(session, res):
         rec.views = int(data.get('views', 0))
         rec.watch_time_minutes = float(data.get('estimatedMinutesWatched', 0))
 
+
+# --- Competitor & AI Logic ---
+
+def fetch_competitors(youtube, session):
+    if not COMPETITOR_CHANNEL_IDS:
+        print("No competitor IDs configured. Skipping competitor fetch.")
+        return
+
+    print("Fetching Competitor Data...")
+    ids_str = ",".join(COMPETITOR_CHANNEL_IDS)
+    
+    # 1. Channel Stats
+    req = youtube.channels().list(
+        part="snippet,statistics,contentDetails",
+        id=ids_str
+    )
+    res = req.execute()
+    
+    for item in res.get('items', []):
+        cid = item['id']
+        snippet = item['snippet']
+        stats = item['statistics']
+        
+        comp = session.query(CompetitorChannel).get(cid)
+        if not comp:
+            comp = CompetitorChannel(channel_id=cid, channel_name=snippet['title'])
+            session.add(comp)
+            
+        comp.channel_name = snippet['title']
+        comp.custom_url = snippet.get('customUrl')
+        comp.thumbnail_url = snippet['thumbnails']['default']['url']
+        comp.subscribers = int(stats.get('subscriberCount', 0))
+        comp.total_views = int(stats.get('viewCount', 0))
+        comp.video_count = int(stats.get('videoCount', 0))
+        comp.last_fetched = datetime.datetime.utcnow()
+        
+        # 2. Recent Videos (Last 3)
+        uploads_id = item['contentDetails']['relatedPlaylists']['uploads']
+        
+        pl_req = youtube.playlistItems().list(
+            part="snippet",
+            playlistId=uploads_id,
+            maxResults=3
+        )
+        try:
+            pl_res = pl_req.execute()
+            video_ids = []
+            video_snippets = {}
+            for v_item in pl_res.get('items', []):
+                vid = v_item['snippet']['resourceId']['videoId']
+                video_ids.append(vid)
+                video_snippets[vid] = v_item['snippet']
+            
+            # Fetch Video Stats
+            if video_ids:
+                v_stats_req = youtube.videos().list(
+                    part="statistics",
+                    id=",".join(video_ids)
+                )
+                v_stats_res = v_stats_req.execute()
+                
+                for v_item in v_stats_res.get('items', []):
+                    vid = v_item['id']
+                    stats = v_item['statistics']
+                    snippet = video_snippets.get(vid)
+                    
+                    cv = session.query(CompetitorVideo).get(vid)
+                    if not cv:
+                        cv = CompetitorVideo(video_id=vid, channel_id=cid)
+                        session.add(cv)
+                    
+                    if snippet:
+                        cv.title = snippet['title']
+                        cv.published_at = datetime.datetime.strptime(snippet['publishedAt'], "%Y-%m-%dT%H:%M:%SZ")
+                    
+                    cv.view_count = int(stats.get('viewCount', 0))
+                    cv.like_count = int(stats.get('likeCount', 0))
+                    cv.comment_count = int(stats.get('commentCount', 0))
+                    cv.last_fetched = datetime.datetime.utcnow()
+                    
+        except Exception as e:
+            print(f"Error fetching videos for {comp.channel_name}: {e}")
+
+    session.commit()
+
+def analyze_with_ollama(session, my_channel_id):
+    print("Running AI Analysis (Ollama)...")
+    
+    # Gather Data
+    channel = session.query(Channel).get(my_channel_id)
+    my_name = channel.name if channel else "My Channel"
+    
+    # Last 30 days stats
+    end_date = datetime.date.today()
+    start_date = end_date - datetime.timedelta(days=30)
+    
+    my_stats = session.query(ChannelDaily).filter(
+        ChannelDaily.channel_id == my_channel_id,
+        ChannelDaily.date >= start_date
+    ).all()
+    
+    if not my_stats: 
+        print("Not enough data for AI analysis.")
+        return None
+    
+    my_views_30d = sum(s.views for s in my_stats)
+    my_subs_30d = sum(s.subscribers_gained for s in my_stats)
+    my_avg_views = int(my_views_30d / len(my_stats)) if my_stats else 0
+    
+    competitors = session.query(CompetitorChannel).all()
+    comp_context = []
+    for c in competitors:
+        comp_context.append(f"- {c.channel_name}: {c.subscribers} Subs, {c.total_views} Total Views")
+        
+    comp_text = "\n".join(comp_context) if comp_context else "No competitor data available."
+    
+    # Improved Prompt
+    prompt = f"""
+    Role: Professional YouTube Data Analyst.
+    Task: Analyze the channel performance and provide strategic advice in JSON format.
+    
+    Target Channel: "{my_name}"
+    - Performance (Last 30 Days): {my_views_30d} Views, {my_subs_30d} New Subs.
+    
+    Competitors/Market Context:
+    {comp_text}
+    
+    Output Requirement:
+    Return a single valid JSON object with exactly these keys: "strengths", "improvements", "action_plan".
+    Each key must have an object with "title" (short, max 10 chars) and "content" (1-2 sentences).
+    Language: Korean (한국어).
+    
+    JSON Example:
+    {{
+      "strengths": {{ "title": "높은 조회수", "content": "최근 30일간 조회수가 상승세입니다." }},
+      "improvements": {{ "title": "구독 전환율", "content": "조회수 대비 구독자 증가가 낮습니다." }},
+      "action_plan": {{ "title": "쇼츠 활용", "content": "유입을 늘리기 위해 인기 곡 커버 쇼츠를 제작하세요." }}
+    }}
+    """
+    
+    try:
+        response = requests.post(OLLAMA_API_URL, json={
+            "model": OLLAMA_MODEL,
+            "prompt": prompt,
+            "stream": False,
+            "format": "json"
+        }, timeout=90) # 90s timeout for stability
+        
+        if response.status_code == 200:
+            res_json = response.json()
+            raw_text = res_json.get('response', '{}')
+            # Parse the inner JSON string if necessary, Ollama 'json' format usually returns a JSON object in 'response' BUT sometimes it's text.
+            # With "format": "json", it tries to enforce structure.
+            try:
+                return json.loads(raw_text)
+            except:
+                print("Failed to parse AI JSON response.")
+                return None
+        else:
+            print(f"Ollama Error ({response.status_code}): {response.text}")
+            return None
+    except Exception as e:
+        print(f"AI Analysis Connection Failed (Is Ollama running?): {e}")
+        return None
+
 # --- JSON Generator (Frontend Compat) ---
 
 def generate_frontend_json(session, channel_id):
@@ -483,11 +660,22 @@ def generate_frontend_json(session, channel_id):
     
     traffic_out = [{"insightTrafficSourceType": x.source_type, "views": x.v, "estimatedMinutesWatched": x.wt} for x in traf_query]
 
+    # 6. AI Insights
+    ai_insights = analyze_with_ollama(session, channel_id)
+    if not ai_insights:
+        # Fallback/Default
+        ai_insights = {
+            "strengths": {"title": "AI 분석 준비", "content": "경쟁 채널 데이터 수집 후 AI 분석이 시작됩니다."},
+            "improvements": {"title": "데이터 부족", "content": "충분한 비교 데이터가 모이면 활성화됩니다."},
+            "action_plan": {"title": "시스템 설정", "content": "경쟁 채널 ID를 설정하고 데이터를 수집하세요."}
+        }
+
     # Final Output
     final_json = {
         "summary": summary,
         "trends": trend_data,
-        "prediction": {"dates": [], "views": []}, # Skipped for now or add simple implementation
+        "prediction": {"dates": [], "views": []}, 
+        "ai_insights": ai_insights,
         "top_videos": top_videos_list,
         "demographics": demographics,
         "traffic_sources": traffic_out
@@ -534,7 +722,11 @@ def main():
     ch.name = c_info['snippet']['title']
     ch.profil_image = c_info['snippet']['thumbnails']['default']['url']
     ch.last_updated = datetime.datetime.utcnow()
+    ch.last_updated = datetime.datetime.utcnow()
     session.commit()
+
+    # 1.5 Fetch Competitors
+    fetch_competitors(youtube, session)
     
     # 2. Scope Determination
     today = datetime.date.today()

@@ -8,7 +8,7 @@
         "total_watch_time_hours_30d": 2,
         "likes_30d": 7,
         "avg_engagement_rate_30d": 0.0,
-        "last_updated": "2025-12-24 06:00:08"
+        "last_updated": "2025-12-24 22:26:44"
     },
     "trends": {
         "daily": {
@@ -10389,6 +10389,20 @@
     "prediction": {
         "dates": [],
         "views": []
+    },
+    "ai_insights": {
+        "strengths": {
+            "title": "AI \ubd84\uc11d \uc900\ube44",
+            "content": "\uacbd\uc7c1 \ucc44\ub110 \ub370\uc774\ud130 \uc218\uc9d1 \ud6c4 AI \ubd84\uc11d\uc774 \uc2dc\uc791\ub429\ub2c8\ub2e4."
+        },
+        "improvements": {
+            "title": "\ub370\uc774\ud130 \ubd80\uc871",
+            "content": "\ucda9\ubd84\ud55c \ube44\uad50 \ub370\uc774\ud130\uac00 \ubaa8\uc774\uba74 \ud65c\uc131\ud654\ub429\ub2c8\ub2e4."
+        },
+        "action_plan": {
+            "title": "\uc2dc\uc2a4\ud15c \uc124\uc815",
+            "content": "\uacbd\uc7c1 \ucc44\ub110 ID\ub97c \uc124\uc815\ud558\uace0 \ub370\uc774\ud130\ub97c \uc218\uc9d1\ud558\uc138\uc694."
+        }
     },
     "top_videos": [
         {

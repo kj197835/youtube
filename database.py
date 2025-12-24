@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, Date, DateTime, ForeignKey, Text, Boolean, UniqueConstraint
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date, DateTime, ForeignKey, Text, Boolean, UniqueConstraint, BigInteger
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime
 
@@ -153,6 +153,43 @@ class TrafficSource(Base):
     
     __table_args__ = (UniqueConstraint('date', 'source_type', name='uix_date_traffic'),)
 
+
+class CompetitorChannel(Base):
+    """Competitor Channel Statistics"""
+    __tablename__ = 'competitor_channels'
+
+    channel_id = Column(String, primary_key=True)
+    channel_name = Column(String, nullable=False)
+    custom_url = Column(String)
+    thumbnail_url = Column(String)
+    
+    # Stats
+    subscribers = Column(Integer, default=0)
+    total_views = Column(BigInteger, default=0) # Using BigInteger for total views
+    video_count = Column(Integer, default=0)
+    
+    last_fetched = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship
+    videos = relationship("CompetitorVideo", back_populates="channel", cascade="all, delete-orphan")
+
+class CompetitorVideo(Base):
+    """Competitor's Recent/Popular Videos"""
+    __tablename__ = 'competitor_videos'
+
+    video_id = Column(String, primary_key=True)
+    channel_id = Column(String, ForeignKey('competitor_channels.channel_id'), nullable=False)
+    
+    title = Column(String)
+    published_at = Column(DateTime)
+    
+    view_count = Column(BigInteger, default=0)
+    like_count = Column(Integer, default=0)
+    comment_count = Column(Integer, default=0)
+    
+    last_fetched = Column(DateTime, default=datetime.utcnow)
+
+    channel = relationship("CompetitorChannel", back_populates="videos")
 
 # Database Setup
 engine = create_engine(f'sqlite:///{DB_NAME}', echo=False)
