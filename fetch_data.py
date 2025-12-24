@@ -677,7 +677,8 @@ def generate_frontend_json(session, channel_id):
         ai_insights = {
             "strengths": {"title": "AI 분석 준비", "content": "경쟁 채널 데이터 수집 후 AI 분석이 시작됩니다."},
             "improvements": {"title": "데이터 부족", "content": "충분한 비교 데이터가 모이면 활성화됩니다."},
-            "action_plan": {"title": "시스템 설정", "content": "경쟁 채널 ID를 설정하고 데이터를 수집하세요."}
+            "action_plan": {"title": "시스템 설정", "content": "경쟁 채널 ID를 설정하고 데이터를 수집하세요."},
+            "detailed_report": "# 분석 준비 중\n\n아직 충분한 데이터가 수집되지 않았습니다. 잠시 후 다시 시도해주세요."
         }
 
     # Final Output
