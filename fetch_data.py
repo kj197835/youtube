@@ -380,7 +380,7 @@ def generate_frontend_json(session, channel_id):
         "total_watch_time_hours_30d": int(total_wt),
         "likes_30d": total_likes,
         "avg_engagement_rate_30d": 0.0, # Placeholder
-        "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "last_updated": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S")[0:19]
     }
     
     # 2. Trends (Daily/Weekly/Monthly)
