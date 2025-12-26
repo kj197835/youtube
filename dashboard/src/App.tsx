@@ -45,7 +45,7 @@ const App: React.FC = () => {
     // Prediction State
     const [predictionModel, setPredictionModel] = useState<'ma' | 'wma' | 'xgboost'>('wma');
     const [predictionData, setPredictionData] = useState<PredictionData | null>(null);
-    const [sortConfig, setSortConfig] = useState<{ key: keyof VideoData; direction: 'asc' | 'desc' } | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: keyof VideoData; direction: 'asc' | 'desc' } | null>({ key: 'views', direction: 'desc' });
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
