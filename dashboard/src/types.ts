@@ -44,9 +44,8 @@ export interface ChartData {
 export interface CommentData {
     id: string;
     author: string;
-    avatar: string;
     text: string;
-    timestamp: string;
+    date: string;
     likes: number;
     videoTitle: string;
 }
@@ -138,6 +137,7 @@ export interface DashboardData {
     };
     ai_insights?: AIInsights;
     top_videos: VideoData[];
+    comments: CommentData[];
     demographics: {
         age_gender: {
             headers: string[];
@@ -148,11 +148,12 @@ export interface DashboardData {
             rows: (string | number)[][];
         };
     };
-    traffic_sources: {
-        insightTrafficSourceType: string;
-        views: number;
-        estimatedMinutesWatched: number;
-    }[];
+};
+traffic_sources: {
+    insightTrafficSourceType: string;
+    views: number;
+    estimatedMinutesWatched: number;
+} [];
 }
 
 export interface TrendData {

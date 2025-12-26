@@ -47,6 +47,7 @@ const App: React.FC = () => {
     const [predictionModel, setPredictionModel] = useState<'ma' | 'wma' | 'xgboost'>('xgboost');
     const [predictionData, setPredictionData] = useState<PredictionData | null>(null);
     const [sortConfig, setSortConfig] = useState<{ key: keyof VideoData; direction: 'asc' | 'desc' } | null>({ key: 'views', direction: 'desc' });
+    const [commentSortConfig, setCommentSortConfig] = useState<{ key: keyof CommentData; direction: 'asc' | 'desc' } | null>({ key: 'date', direction: 'desc' });
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -250,6 +251,29 @@ const App: React.FC = () => {
 
     if (loadingData && !stats) return <div className="flex items-center justify-center h-screen bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div></div>;
 
+    const handleCommentSort = (key: keyof CommentData) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (commentSortConfig && commentSortConfig.key === key && commentSortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setCommentSortConfig({ key, direction });
+    };
+
+    const sortedComments = React.useMemo(() => {
+        let sortable = [...comments];
+        if (commentSortConfig !== null) {
+            sortable.sort((a, b) => {
+                const aVal = a[commentSortConfig.key];
+                const bVal = b[commentSortConfig.key];
+
+                if (aVal < bVal) return commentSortConfig.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return commentSortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortable;
+    }, [comments, commentSortConfig]);
+
     const renderContent = () => {
         switch (activeTab) {
             case 'Dashboard':
@@ -440,11 +464,20 @@ const App: React.FC = () => {
                                     <tr>
                                         <th className="px-4 py-3 text-gray-900 w-[50%]">{t.table.comment}</th>
                                         <th className="px-4 py-3 text-gray-900 w-[30%]">{t.table.videoName}</th>
-                                        <th className="px-4 py-3 text-gray-900 w-[20%]">{t.table.date}</th>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors w-[20%]" onClick={() => handleCommentSort('date')}>
+                                            <div className="flex items-center text-gray-900">
+                                                {t.table.date}
+                                                {commentSortConfig?.key === 'date' ? (
+                                                    commentSortConfig.direction === 'asc' ?
+                                                        <ArrowUp className="w-3 h-3 ml-1 text-red-500" /> :
+                                                        <ArrowDown className="w-3 h-3 ml-1 text-red-500" />
+                                                ) : <ArrowUpDown className="w-3 h-3 ml-1 text-gray-300" />}
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 text-[11px]">
-                                    {comments.map(c => (
+                                    {sortedComments.map(c => (
                                         <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-4 py-3 text-gray-800 font-medium">
                                                 <div className="line-clamp-2" title={c.text}>{c.text}</div>

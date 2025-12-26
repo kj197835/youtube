@@ -157,14 +157,15 @@ def fetch_comments(youtube, channel_id):
         res = req.execute()
         comments = []
         for item in res.get('items', []):
-            top = item['snippet']['topLevelComment']['snippet']
+            top_obj = item['snippet']['topLevelComment']
+            top_snip = top_obj['snippet']
             comments.append({
-                'id': top['id'],
-                'video_id': top.get('videoId'), # Can be channel comment (None) or video comment
-                'text': top['textDisplay'],
-                'author': top['authorDisplayName'],
-                'published_at': top['publishedAt'],
-                'likes': top['likeCount']
+                'id': top_obj['id'],
+                'video_id': top_snip.get('videoId'),
+                'text': top_snip['textDisplay'],
+                'author': top_snip['authorDisplayName'],
+                'published_at': top_snip['publishedAt'],
+                'likes': top_snip['likeCount']
             })
         return comments
     except Exception as e:
@@ -779,7 +780,8 @@ def generate_frontend_json(session, channel_id):
         }
 
     # 7. Recent Comments
-    recent_comments = session.query(Comment).join(Video).order_by(Comment.published_at.desc()).limit(50).all()
+    recent_comments = session.query(Comment).outerjoin(Video).order_by(Comment.published_at.desc()).limit(50).all()
+    print(f"DEBUG: Found {len(recent_comments)} comments in DB for JSON.")
     comments_json = []
     for c in recent_comments:
         comments_json.append({
