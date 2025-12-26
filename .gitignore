@@ -17,3 +17,10 @@ auto_update.log
 # Database
 *.db
 youtube_data.db
+
+# Node
+node_modules/
+dashboard/node_modules/
+dist/
+dashboard/dist/
+
