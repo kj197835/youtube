@@ -332,6 +332,7 @@ const App: React.FC = () => {
                     </div>
                 );
 
+            case 'Content':
                 const handleSort = (key: keyof VideoData) => {
                     let direction: 'asc' | 'desc' = 'desc';
                     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
