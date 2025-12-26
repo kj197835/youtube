@@ -249,8 +249,6 @@ const App: React.FC = () => {
     const rangeLabel = timeRange === 'Daily' ? '(30d)' : timeRange === 'Weekly' ? '(30w)' : '(30m)';
     const displayChartData = getDisplayChartData();
 
-    if (loadingData && !stats) return <div className="flex items-center justify-center h-screen bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div></div>;
-
     const handleCommentSort = (key: keyof CommentData) => {
         let direction: 'asc' | 'desc' = 'asc';
         if (commentSortConfig && commentSortConfig.key === key && commentSortConfig.direction === 'asc') {
@@ -273,6 +271,8 @@ const App: React.FC = () => {
         }
         return sortable;
     }, [comments, commentSortConfig]);
+
+    if (loadingData && !stats) return <div className="flex items-center justify-center h-screen bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div></div>;
 
     const renderContent = () => {
         switch (activeTab) {
