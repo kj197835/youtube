@@ -2,13 +2,13 @@
     "summary": {
         "channel_name": "AI Sound Lab",
         "profile_image": null,
-        "total_views_30d": 174,
+        "total_views_30d": 176,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 3,
         "total_watch_time_hours_30d": 2,
         "likes_30d": 7,
         "avg_engagement_rate_30d": 0.0,
-        "last_updated": "2025-12-25 23:25:56"
+        "last_updated": "2025-12-26 23:07:44"
     },
     "trends": {
         "daily": {
@@ -1109,7 +1109,8 @@
                 "2025-12-19",
                 "2025-12-20",
                 "2025-12-21",
-                "2025-12-22"
+                "2025-12-22",
+                "2025-12-23"
             ],
             "views": [
                 0,
@@ -2208,9 +2209,11 @@
                 1,
                 0,
                 0,
-                4
+                4,
+                2
             ],
             "revenue": [
+                0.0,
                 0.0,
                 0.0,
                 0.0,
@@ -4406,6 +4409,7 @@
                 0,
                 0,
                 0,
+                0,
                 0
             ],
             "likes": [
@@ -5505,6 +5509,7 @@
                 0,
                 0,
                 0,
+                0,
                 0
             ],
             "comments": [
@@ -6585,6 +6590,7 @@
                 0,
                 0,
                 1,
+                0,
                 0,
                 0,
                 0,
@@ -7703,7 +7709,8 @@
                 28.0,
                 0.0,
                 0.0,
-                189.0
+                189.0,
+                81.0
             ],
             "estimatedMinutesWatched": [
                 0.0,
@@ -8802,7 +8809,8 @@
                 0.0,
                 0.0,
                 0.0,
-                12.0
+                12.0,
+                2.0
             ]
         },
         "weekly": {
@@ -8963,7 +8971,8 @@
                 "2025-12-01",
                 "2025-12-08",
                 "2025-12-15",
-                "2025-12-22"
+                "2025-12-22",
+                "2025-12-29"
             ],
             "views": [
                 0,
@@ -9122,9 +9131,11 @@
                 0,
                 116,
                 38,
-                20
+                20,
+                2
             ],
             "revenue": [
+                0.0,
                 0.0,
                 0.0,
                 0.0,
@@ -9440,6 +9451,7 @@
                 0,
                 3,
                 0,
+                0,
                 0
             ],
             "likes": [
@@ -9598,6 +9610,7 @@
                 0,
                 0,
                 7,
+                0,
                 0,
                 0
             ],
@@ -9758,6 +9771,7 @@
                 0,
                 1,
                 0,
+                0,
                 0
             ],
             "averageViewDuration": [
@@ -9917,7 +9931,8 @@
                 0.0,
                 330.0,
                 470.0,
-                313.0
+                313.0,
+                81.0
             ],
             "estimatedMinutesWatched": [
                 0.0,
@@ -10076,7 +10091,8 @@
                 0.0,
                 103.0,
                 57.0,
-                17.0
+                17.0,
+                2.0
             ]
         },
         "monthly": {
@@ -10156,7 +10172,7 @@
                 0,
                 0,
                 0,
-                174
+                176
             ],
             "revenue": [
                 0.0,
@@ -10351,7 +10367,7 @@
                 0.0,
                 0.0,
                 0.0,
-                1113.0
+                1194.0
             ],
             "estimatedMinutesWatched": [
                 0.0,
@@ -10390,7 +10406,7 @@
                 0.0,
                 0.0,
                 0.0,
-                177.0
+                179.0
             ]
         }
     },
@@ -10401,33 +10417,33 @@
     "ai_insights": {
         "current_analysis": {
             "strengths": {
-                "title": "\ud604\uc7ac \ubd84\uc11d",
-                "content": "\ucd5c\uadfc 30\uc77c \ub3d9\uc548\n174 views, 3 new subscribers\ub97c \uae30\ub85d\ud588\uc2b5\ub2c8\ub2e4.\n\uc774\uac83\uc740 AI Sound Lab \ucc44\ub110\uc758 \ud604\uc7ac \uc131\uc7a5 \uacbd\ud5a5\uc744 \ubc18\uc601\ud569\ub2c8\ub2e4."
+                "title": "\ud604\uc7ac \uc131\uacfc",
+                "content": "\ucd5c\uadfc 30\uc77c\uac04 AI Sound Lab\uc758 \uc131\uacfc\ub294 \ub2e4\uc74c\uacfc \uac19\uc2b5\ub2c8\ub2e4.\n- \uc870\ud68c\uc218: 176\n- \uc2e0\uaddc \uad6c\ub3c5\uc790: 3"
             },
             "improvements": {
-                "title": " \uac1c\uc120\uc810 ",
-                "content": "\ud604\uc7ac \uc2dc\uccad\uc790 \uc218\ub294 \uc791\uc9c0\ub9cc \uc2e0\uaddc \uad6c\ub3c5\uc790\uac00 \uc99d\uac00\ud558\uace0 \uc788\uc2b5\ub2c8\ub2e4. \uc774\uc5d0 \ub530\ub77c \ucc44\ub110\uc758 \uc778\uc9c0\ub3c4\uc640 \uc804\uc5ed \ud655\uc0b0\uc740 \uc6b0\uc218\ud55c \uc131\uc7a5\uc774\ub2e4.\n\ud558\uc9c0\ub9cc, \uc774 \uc2dc\uccad\uc790\ub4e4\uc758 \uc9c0\uc18d\uc801\uc778 \ucc38\uc5ec\ub97c \uc720\ub3c4\ud558\ub294 \uac83\uc774 \uacfc\uc81c\uc785\ub2c8\ub2e4."
+                "title": "\ud5a5\ud6c4 \uac1c\uc120\uc810",
+                "content": "\ud604\uc7ac \uc131\uacfc\ub97c \ud5a5\uc0c1\ud560 \uc218 \uc788\ub294 \ubc29\ubc95\uc740 \ub2e4\uc74c\uacfc \uac19\uc2b5\ub2c8\ub2e4.\n1. \ucf58\ud150\uce20 \ub2e4\uc591\ud654\n2. \uc18c\uc15c \ubbf8\ub514\uc5b4 \ub9c8\ucf00\ud305\n3. \ud611\ub825 \ubc0f \ud30c\ud2b8\ub108\uc2ed"
             },
             "action_plan": {
-                "title": "\uc989\uc2dc \uc2dc\ud589\ud560 \uacc4\ud68d",
-                "content": "1. \uc0c8\ub85c\uc6b4 \ucf58\ud150\uce20 \ucd9c\uc2dc: \ud604\uc7ac \ucc44\ub110\uc758 \uc778\uc9c0\ub3c4\uc640 \uc804\uc5ed \ud655\uc0b0\uc744 \uc720\uc9c0\ud558\uae30 \uc704\ud574 \uc2e0\uaddc \ucf58\ud150\uce20\ub97c \ube60\ub974\uac8c \ucd9c\uc2dc\ud558\uc5ec \uc2dc\uccad\uc790\ub4e4\uc758 \uad00\uc2ec\uc744 \uc720\uc9c0\ud569\ub2c8\ub2e4.\n2. \ub9c8\ucf00\ud305 \ud65c\ub3d9 \uac15\ud654: \ucc44\ub110\uc5d0 \ub300\ud55c \uc778\uc9c0\ub3c4\ub97c \uc99d\ub300\uc2dc\ud0a4\uae30 \uc704\ud574 \ub9c8\ucf00\ud305 \ud65c\ub3d9\uc744 \uac15\ud654\ud569\ub2c8\ub2e4."
+                "title": "\uc989\uac01\uc801\uc778 \ud589\ub3d9 \uacc4\ud68d",
+                "content": "\ub2e4\uc74c\uacfc \uac19\uc740 \uc989\uac01\uc801\uc778 \ud589\ub3d9\uc744 \ucde8\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n1. \ucf58\ud150\uce20 \ub2e4\uc591\ud654\ub97c \uc704\ud55c \uc5f0\uad6c\n2. \uc18c\uc15c \ubbf8\ub514\uc5b4 \ub9c8\ucf00\ud305 \ucea0\ud398\uc778 \uc9c4\ud589"
             },
-            "detailed_report": "# \ud604\uc7ac \ubd84\uc11d\n\n### \uc131\uc7a5 \uacbd\ud5a5\n- \ucd5c\uadfc 30\uc77c \ub3d9\uc548\n174 views, 3 new subscribers\ub97c \uae30\ub85d\ud588\uc2b5\ub2c8\ub2e4.\n\n### \uac1c\uc120\uc810\n- \uc2dc\uccad\uc790 \uc218\ub294 \uc791\uc9c0\ub9cc \uc2e0\uaddc \uad6c\ub3c5\uc790\uac00 \uc99d\uac00\ud558\uace0 \uc788\uc2b5\ub2c8\ub2e4.\n- \ucc44\ub110\uc758 \uc778\uc9c0\ub3c4\uc640 \uc804\uc5ed \ud655\uc0b0\uc740 \uc6b0\uc218\ud55c \uc131\uc7a5\uc774\ub2e4.\n\n### \uc989\uc2dc \uc2dc\ud589\ud560 \uacc4\ud68d\n1. \uc0c8\ub85c\uc6b4 \ucf58\ud150\uce20 \ucd9c\uc2dc: \ud604\uc7ac \ucc44\ub110\uc758 \uc778\uc9c0\ub3c4\uc640 \uc804\uc5ed \ud655\uc0b0\uc744 \uc720\uc9c0\ud558\uae30 \uc704\ud574 \uc2e0\uaddc \ucf58\ud150\uce20\ub97c \ube60\ub974\uac8c \ucd9c\uc2dc\ud558\uc5ec \uc2dc\uccad\uc790\ub4e4\uc758 \uad00\uc2ec\uc744 \uc720\uc9c0\ud569\ub2c8\ub2e4.\n2. \ub9c8\ucf00\ud305 \ud65c\ub3d9 \uac15\ud654: \ucc44\ub110\uc5d0 \ub300\ud55c \uc778\uc9c0\ub3c4\ub97c \uc99d\ub300\uc2dc\ud0a4\uae30 \uc704\ud574 \ub9c8\ucf00\ud305 \ud65c\ub3d9\uc744 \uac15\ud654\ud569\ub2c8\ub2e4."
+            "detailed_report": "**\ucd5c\uadfc 30\uc77c\uac04 AI Sound Lab\uc758 \uc131\uacfc**\n\n* \uc870\ud68c\uc218: 176\n* \uc2e0\uaddc \uad6c\ub3c5\uc790: 3\n\n**\ud5a5\ud6c4 \uac1c\uc120\uc810**\n\n1. \ucf58\ud150\uce20 \ub2e4\uc591\ud654\ub97c \ud1b5\ud574 \uc2dc\uccad\uc790\ub4e4\uc758 \uad00\uc2ec\uc744 \ub04c \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n2. \uc18c\uc15c \ubbf8\ub514\uc5b4 \ub9c8\ucf00\ud305 \ucea0\ud398\uc778\uc73c\ub85c \uc778\uc9c0\ub3c4\ub97c \ub192\uc77c \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n3. \ud611\ub825 \ubc0f \ud30c\ud2b8\ub108\uc2ed\uc744 \ud1b5\ud574 \uc0c8\ub85c\uc6b4 \uc131\uacfc\ub97c \ucc3d\ucd9c\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4."
         },
         "future_strategy": {
             "growth_trend": {
-                "title": "\ucd94\uc815 \uc131\uc7a5 \uacbd\ud5a5",
-                "content": "XGBoost \uc608\uce21 \uacb0\uacfc, \ub2e4\uc74c 30\uc77c \ub3d9\uc548\n\uc2dc\uccad\uc790 \uc218\ub294 \ud604\uc7ac\uc640 \ub3d9\uc77c\ud560 \uac83\uc73c\ub85c \ubcf4\uc785\ub2c8\ub2e4. (0.0% \uc99d\uac00).\n\uc774\uac83\uc740 \ud604\uc7ac \ucc44\ub110\uc758 \uc131\uc7a5 \uacbd\ud5a5\uc744 \ubc18\uc601\ud569\ub2c8\ub2e4."
+                "title": "\ud5a5\ud6c4 \uc131\uc7a5 \uc804\ub9dd",
+                "content": "XGBoost \uc608\uce21 \uacb0\uacfc\uc5d0 \ub530\ub974\uba74, \ud5a5\ud6c4 30\uc77c\uac04\uc758 \uc870\ud68c\uc218\ub294 \ud604\uc7ac\uc640 \ube44\uad50\ud558\uc5ec 0.0% \uc99d\uac00\ud560 \uac83\uc73c\ub85c \uc608\uc0c1\ub429\ub2c8\ub2e4.\n\n* \uc870\ud68c\uc218: 2-2"
             },
             "risk_factor": {
                 "title": "\uc704\ud5d8 \uc694\uc778",
-                "content": "\ud604\uc7ac \ucc44\ub110\uc758 \uc2dc\uccad\uc790 \uc218\ub294 \uc791\uc9c0\ub9cc \uc2e0\uaddc \uad6c\ub3c5\uc790\uac00 \uc99d\uac00\ud558\uace0 \uc788\uc2b5\ub2c8\ub2e4.\n\ud558\uc9c0\ub9cc, \uc774 \uc2e0\uaddc \uad6c\ub3c5\uc790\ub4e4\uc758 \uc9c0\uc18d\uc801\uc778 \ucc38\uc5ec\ub97c \uc720\ub3c4\ud558\ub294 \uac83\uc774 \uacfc\uc81c\uc785\ub2c8\ub2e4.\n\uadf8\ub9ac\uace0 XGBoost \uc608\uce21 \uacb0\uacfc\uc5d0 \uc758\ud558\uba74, \ub2e4\uc74c 30\uc77c \ub3d9\uc548 \uc2dc\uccad\uc790 \uc218\uac00 \uc720\uc9c0\ub420 \uac83\uc73c\ub85c \ubcf4\uc785\ub2c8\ub2e4."
+                "content": "XGBoost \uc608\uce21 \uacb0\uacfc\uc5d0 \ub530\ub974\uba74, \ud5a5\ud6c4 30\uc77c\uac04\uc758 \uc870\ud68c\uc218\ub294 \ud604\uc7ac\uc640 \ube44\uad50\ud558\uc5ec 0.0% \uc99d\uac00\ud560 \uac83\uc73c\ub85c \uc608\uc0c1\ub429\ub2c8\ub2e4.\n\n* \uc704\ud5d8 \uc694\uc778\uc740 \uc2dc\uccad\uc790\ub4e4\uc758 \ubc18\uc751\uacfc \ucf58\ud150\uce20 \ub2e4\uc591\ud654\uc5d0 \ub2ec\ub824 \uc788\uc2b5\ub2c8\ub2e4."
             },
             "action_strategy": {
-                "title": "\uc801\uadf9\uc801\uc73c\ub85c \uc9c4\ud589\ud560 \uacc4\ud68d",
-                "content": "1. \uc2e0\uaddc \ucf58\ud150\uce20\uc758 \ub2e4\uc591\uc131 \ud655\ubcf4: \ud604\uc7ac \ucc44\ub110\uc758 \uc778\uc9c0\ub3c4\uc640 \uc804\uc5ed \ud655\uc0b0\uc744 \uc720\uc9c0\ud558\uae30 \uc704\ud574 \uc2e0\uaddc \ucf58\ud150\uce20\ub97c \ub2e4\uc591\ud55c \uc7a5\ub974\ub85c \ucd9c\uc2dc\ud558\uc5ec \uc2dc\uccad\uc790\ub4e4\uc758 \uad00\uc2ec\uc744 \uc720\uc9c0\ud569\ub2c8\ub2e4.\n2. \ub9c8\ucf00\ud305 \ud65c\ub3d9 \uac15\ud654: \ucc44\ub110\uc5d0 \ub300\ud55c \uc778\uc9c0\ub3c4\ub97c \uc99d\ub300\uc2dc\ud0a4\uae30 \uc704\ud574 \ub9c8\ucf00\ud305 \ud65c\ub3d9\uc744 \uac15\ud654\ud569\ub2c8\ub2e4."
+                "title": "\ud5a5\ud6c4 \ud589\ub3d9 \uc804\ub7b5",
+                "content": "\ub2e4\uc74c\uacfc \uac19\uc740 \ud5a5\ud6c4 \ud589\ub3d9\uc744 \ucde8\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n1. \ucf58\ud150\uce20 \ub2e4\uc591\ud654\ub97c \uc704\ud55c \uc5f0\uad6c\n2. \uc18c\uc15c \ubbf8\ub514\uc5b4 \ub9c8\ucf00\ud305 \ucea0\ud398\uc778 \uc9c4\ud589\n3. \ud611\ub825 \ubc0f \ud30c\ud2b8\ub108\uc2ed"
             },
-            "detailed_report": "# \ucd94\uc815 \uc131\uc7a5 \uacbd\ud5a5\n\n### \uc704\ud5d8 \uc694\uc778\n- \uc2e0\uaddc \uad6c\ub3c5\uc790\ub4e4\uc758 \uc9c0\uc18d\uc801\uc778 \ucc38\uc5ec\ub97c \uc720\ub3c4\ud558\ub294 \uac83\uc774 \uacfc\uc81c\uc785\ub2c8\ub2e4.\n- XGBoost \uc608\uce21 \uacb0\uacfc\uc5d0 \uc758\ud558\uba74, \ub2e4\uc74c 30\uc77c \ub3d9\uc548 \uc2dc\uccad\uc790 \uc218\uac00 \uc720\uc9c0\ub420 \uac83\uc73c\ub85c \ubcf4\uc785\ub2c8\ub2e4.\n\n### \uc801\uadf9\uc801\uc73c\ub85c \uc9c4\ud589\ud560 \uacc4\ud68d\n1. \uc2e0\uaddc \ucf58\ud150\uce20\uc758 \ub2e4\uc591\uc131 \ud655\ubcf4: \ud604\uc7ac \ucc44\ub110\uc758 \uc778\uc9c0\ub3c4\uc640 \uc804\uc5ed \ud655\uc0b0\uc744 \uc720\uc9c0\ud558\uae30 \uc704\ud574 \uc2e0\uaddc \ucf58\ud150\uce20\ub97c \ub2e4\uc591\ud55c \uc7a5\ub974\ub85c \ucd9c\uc2dc\ud558\uc5ec \uc2dc\uacac\uc790\uc758 \uad00\uc2ec\uc744 \uc720\uc9c0\ud569\ub2c8\ub2e4.\n2. \ub9c8\ucf00\ud305 \ud65c\ub3d9 \uac15\ud654: \ucc44\ub110\uc5d0 \ub300\ud55c \uc778\uc9c0\ub3c4\ub97c \uc99d\ub300\uc2dc\ud0a4\uae30 \uc704\ud574 \ub9c8\ucf00\ud305 \ud65c\ub3d9\uc744 \uac15\ud654\ud569\ub2c8\ub2e4."
+            "detailed_report": "**\ud5a5\ud6c4 30\uc77c\uac04\uc758 \uc131\uc7a5 \uc804\ub9dd**\n\n* \uc870\ud68c\uc218: 2-2 (0.0% \uc99d\uac00)\n\n**\uc704\ud5d8 \uc694\uc778**\n\n* \uc2dc\uccad\uc790\ub4e4\uc758 \ubc18\uc751\uacfc \ucf58\ud150\uce20 \ub2e4\uc591\ud654\uc5d0 \ub2ec\ub824 \uc788\uc2b5\ub2c8\ub2e4.\n\n**\ud5a5\ud6c4 \ud589\ub3d9 \uc804\ub7b5**\n\n1. \ucf58\ud150\uce20 \ub2e4\uc591\ud654\ub97c \uc704\ud55c \uc5f0\uad6c\n2. \uc18c\uc15c \ubbf8\ub514\uc5b4 \ub9c8\ucf00\ud305 \ucea0\ud398\uc778 \uc9c4\ud589\n3. \ud611\ub825 \ubc0f \ud30c\ud2b8\ub108\uc2ed"
         }
     },
     "top_videos": [
@@ -10435,7 +10451,7 @@
             "video": "wFqzxvKPO3M",
             "title": "The Spitter - \ucc28\uac00\uc6b4 \ube44, \ub274\uc695\uc758 \uac70\ub9ac\uc5d0\uc11c \ud3ed\ubc1c\ud55c \ubd84\ub178. \uac31\uc2a4\ud130 \ud799\ud569 (Gangster Rap).",
             "thumbnail": "https://i.ytimg.com/vi/wFqzxvKPO3M/mqdefault.jpg",
-            "views": 53,
+            "views": 54,
             "likes": 1,
             "comments": 0,
             "shares": 1,
@@ -10465,7 +10481,7 @@
             "video": "SZocibagft4",
             "title": "In the indifferent city - \uc7bf\ube5b \ub3c4\uc2dc, \uc7a0 \ubabb \ub4dc\ub294 \ubc24 \ud83c\udf03 | AI\uc640 \ud568\uaed8\ud558\ub294 \uc6b0\uc6b8\ud55c R&B POP",
             "thumbnail": "https://i.ytimg.com/vi/SZocibagft4/mqdefault.jpg",
-            "views": 22,
+            "views": 23,
             "likes": 1,
             "comments": 0,
             "shares": 0,
@@ -10500,8 +10516,8 @@
             "rows": [
                 [
                     "KR",
-                    184,
-                    384.0
+                    230,
+                    480.0
                 ]
             ]
         }
@@ -10509,7 +10525,7 @@
     "traffic_sources": [
         {
             "insightTrafficSourceType": "RELATED_VIDEO",
-            "views": 49,
+            "views": 50,
             "estimatedMinutesWatched": 41.0
         },
         {
@@ -10518,14 +10534,14 @@
             "estimatedMinutesWatched": 24.0
         },
         {
+            "insightTrafficSourceType": "SUBSCRIBER",
+            "views": 28,
+            "estimatedMinutesWatched": 46.0
+        },
+        {
             "insightTrafficSourceType": "SHORTS",
             "views": 28,
             "estimatedMinutesWatched": 1.0
-        },
-        {
-            "insightTrafficSourceType": "SUBSCRIBER",
-            "views": 27,
-            "estimatedMinutesWatched": 44.0
         },
         {
             "insightTrafficSourceType": "PLAYLIST",
