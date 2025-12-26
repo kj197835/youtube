@@ -90,7 +90,7 @@ export const translations = {
             likes: "Likes",
             dislikes: "Dislikes",
             revenue: "Revenue",
-            comment: "Comment",
+            comment: "Voices",
             videoName: "Video Name",
             date: "Date"
         },
@@ -233,7 +233,7 @@ export const translations = {
             likes: "좋아요",
             dislikes: "싫어요",
             revenue: "수익",
-            comment: "댓글",
+            comment: "보이스",
             videoName: "동영상",
             date: "날짜"
         },
