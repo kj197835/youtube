@@ -68,8 +68,8 @@ export const translations = {
         },
         predictionModels: {
             ma: "Simple Moving Average",
-            wma: "Weighted Moving Average (Default)",
-            xgboost: "XGBoost (AI)"
+            wma: "Weighted Moving Average",
+            xgboost: "XGBoost (AI - Default)"
         },
         chartType: {
             changes: "Changes",
@@ -206,8 +206,8 @@ export const translations = {
         },
         predictionModels: {
             ma: "단순 이동 평균 (Simple MA)",
-            wma: "가중 이동 평균 (Weighted MA - 기본값)",
-            xgboost: "XGBoost (AI 예측)"
+            wma: "가중 이동 평균 (Weighted MA)",
+            xgboost: "XGBoost (AI 예측 - 기본값)"
         },
         chartType: {
             changes: "변화량",
