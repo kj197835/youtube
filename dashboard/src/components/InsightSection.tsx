@@ -92,6 +92,8 @@ const InsightSection: React.FC<InsightSectionProps> = ({ data, title = "AI Data 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 report={data.detailed_report || ""}
+                title={variant === 'future' ? "AI Future Growth Strategy" : "AI Current Performance Analysis"}
+                description={variant === 'future' ? "Long-term Prediction & Strategic Roadmap" : "Comprehensive Analysis & Action Items"}
             />
         </div>
     );

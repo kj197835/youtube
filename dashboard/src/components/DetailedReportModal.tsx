@@ -8,9 +8,17 @@ interface DetailedReportModalProps {
     isOpen: boolean;
     onClose: () => void;
     report: string;
+    title?: string;
+    description?: string;
 }
 
-const DetailedReportModal: React.FC<DetailedReportModalProps> = ({ isOpen, onClose, report }) => {
+const DetailedReportModal: React.FC<DetailedReportModalProps> = ({
+    isOpen,
+    onClose,
+    report,
+    title = "AI Detailed Strategic Report",
+    description = "Comprehensive analysis & Action items"
+}) => {
     const reportRef = useRef<HTMLDivElement>(null);
 
     if (!isOpen) return null;
@@ -43,8 +51,8 @@ const DetailedReportModal: React.FC<DetailedReportModalProps> = ({ isOpen, onClo
                             <FileText className="w-6 h-6 text-purple-600" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900">AI Detailed Strategic Report</h2>
-                            <p className="text-sm text-gray-500">Comprehensive analysis & Action items</p>
+                            <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+                            <p className="text-sm text-gray-500">{description}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
