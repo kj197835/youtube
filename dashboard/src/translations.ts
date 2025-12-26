@@ -10,7 +10,7 @@ export const translations = {
         // Navigation
         nav: {
             dashboard: "Dashboard",
-            content: "Contents",
+            content: "Videos",
             analytics: "Prediction",
             earn: "Earn",
             customization: "Customization"
@@ -51,7 +51,7 @@ export const translations = {
             aiRec: "RECOMMENDATION",
             detailedAnalytics: "30-Day Growth Forecast", // Renamed
             predictionDisclaimer: "This is a prediction for the next 30 days based on current trends.", // New key
-            topVideos: "Top Videos",
+            topVideos: "Videos",
             noData: "No detailed trend data available for this period.",
             noDataSub: "Daily stats might be hidden by YouTube for privacy."
         },
@@ -150,7 +150,7 @@ export const translations = {
         // Navigation
         nav: {
             dashboard: "대시보드",
-            content: "콘텐츠",
+            content: "동영상",
             analytics: "미래 예측",
             earn: "수익 창출",
             customization: "맞춤 설정"
@@ -188,8 +188,8 @@ export const translations = {
             aiSubtitle: "예측된 성장 데이터를 기반으로 분석된 전략입니다.",
             aiRec: "추천 전략",
             detailedAnalytics: "30일 성장 예측", // Renamed
-            predictionDisclaimer: "현재 트렌드 분석 데이터를 기반으로 한 30일 예측치입니다 (XGBoost 적용).", // New key
-            topVideos: "인기 동영상",
+            predictionDisclaimer: "현재 트렌드 분석 데이터를 기반으로 한 30일 예측치입니다.", // New key
+            topVideos: "동영상",
             noData: "이 기간에 대한 상세 데이터가 없습니다.",
             noDataSub: "유튜브 개인정보 보호 정책으로 인해 일일 데이터가 숨겨졌을 수 있습니다."
         },

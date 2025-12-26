@@ -4,7 +4,7 @@ import { ChannelStats, VideoData, AIInsights, ChartData, AppTab, DashboardData, 
 import StatsCard from './components/StatsCard';
 import InsightSection from './components/InsightSection';
 import { translations, Language } from './translations';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 
 const NavItem: React.FC<{ label: string; active: boolean; onClick: () => void; icon: React.ReactNode }> = ({ label, active, onClick, icon }) => (
@@ -45,6 +45,7 @@ const App: React.FC = () => {
     // Prediction State
     const [predictionModel, setPredictionModel] = useState<'ma' | 'wma' | 'xgboost'>('wma');
     const [predictionData, setPredictionData] = useState<PredictionData | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: keyof VideoData; direction: 'asc' | 'desc' } | null>(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -330,7 +331,30 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 );
-            case 'Content':
+
+                const handleSort = (key: keyof VideoData) => {
+                    let direction: 'asc' | 'desc' = 'desc';
+                    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
+                        direction = 'asc';
+                    }
+                    setSortConfig({ key, direction });
+                };
+
+                const sortedVideos = [...videos.slice(0, videoLimit === 'ALL' ? undefined : videoLimit)].sort((a, b) => {
+                    if (!sortConfig) return 0;
+                    const { key, direction } = sortConfig;
+                    if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+                    if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                const SortIcon = ({ column }: { column: keyof VideoData }) => {
+                    if (sortConfig?.key !== column) return <ArrowUpDown className="w-3 h-3 ml-1 text-gray-300" />;
+                    return sortConfig.direction === 'asc'
+                        ? <ArrowUp className="w-3 h-3 ml-1 text-red-500" />
+                        : <ArrowDown className="w-3 h-3 ml-1 text-red-500" />;
+                };
+
                 return (
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-50 flex items-center justify-between">
@@ -358,14 +382,22 @@ const App: React.FC = () => {
                                         <th className="px-4 py-3 text-gray-900 w-[50px]">{t.table.image}</th>
                                         <th className="px-4 py-3 text-gray-900 w-[40%]">{t.table.video}</th>
                                         <th className="px-4 py-3 text-gray-900">{t.table.id}</th>
-                                        <th className="px-4 py-3 text-gray-900">{t.table.views}</th>
-                                        <th className="px-4 py-3 text-gray-900">{t.table.likes}</th>
-                                        <th className="px-4 py-3 text-gray-900">{t.table.dislikes}</th>
-                                        <th className="px-4 py-3 text-gray-900">{t.table.revenue}</th>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('views')}>
+                                            <div className="flex items-center text-gray-900">{t.table.views} <SortIcon column="views" /></div>
+                                        </th>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('likes')}>
+                                            <div className="flex items-center text-gray-900">{t.table.likes} <SortIcon column="likes" /></div>
+                                        </th>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('dislikes')}>
+                                            <div className="flex items-center text-gray-900">{t.table.dislikes} <SortIcon column="dislikes" /></div>
+                                        </th>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('revenue')}>
+                                            <div className="flex items-center text-gray-900">{t.table.revenue} <SortIcon column="revenue" /></div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 text-[11px]">
-                                    {(videoLimit === 'ALL' ? videos : videos.slice(0, videoLimit)).map(v => (
+                                    {sortedVideos.map(v => (
                                         <tr key={v.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-4 py-2">
                                                 <img
