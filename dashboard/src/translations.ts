@@ -55,7 +55,8 @@ export const translations = {
             predictionDisclaimer: "This is a prediction for the next 30 days based on current trends.", // New key
             topVideos: "Videos",
             noData: "No detailed trend data available for this period.",
-            noDataSub: "Daily stats might be hidden by YouTube for privacy."
+            noDataSub: "Daily stats might be hidden by YouTube for privacy.",
+            commentsPageTitle: "Voices"
         },
 
         // Dropdowns
@@ -198,7 +199,9 @@ export const translations = {
             predictionDisclaimer: "현재 트렌드 분석 데이터를 기반으로 한 30일 예측치입니다.", // New key
             topVideos: "동영상",
             noData: "이 기간에 대한 상세 데이터가 없습니다.",
-            noDataSub: "유튜브 개인정보 보호 정책으로 인해 일일 데이터가 숨겨졌을 수 있습니다."
+            noData: "이 기간에 대한 상세 데이터가 없습니다.",
+            noDataSub: "유튜브 개인정보 보호 정책으로 인해 일일 데이터가 숨겨졌을 수 있습니다.",
+            commentsPageTitle: "보이스"
         },
 
         // Dropdowns

@@ -460,7 +460,7 @@ const App: React.FC = () => {
                 return (
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-                            <h3 className="font-bold text-lg text-gray-900">{t.nav.comments}</h3>
+                            <h3 className="font-bold text-lg text-gray-900">{t.sections.commentsPageTitle}</h3>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs text-gray-400 font-medium">Show:</span>
                                 <div className="flex bg-gray-100 rounded-lg p-1">
