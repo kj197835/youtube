@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { ChannelStats, VideoData, AIInsights, ChartData, AppTab, DashboardData, PredictionData } from './types';
+import { ChannelStats, VideoData, AIInsights, ChartData, AppTab, DashboardData, PredictionData, CommentData } from './types';
 import StatsCard from './components/StatsCard';
 import InsightSection from './components/InsightSection';
 import { translations, Language } from './translations';
@@ -36,6 +36,7 @@ const App: React.FC = () => {
     // Data State
     const [stats, setStats] = useState<ChannelStats | null>(null);
     const [videos, setVideos] = useState<VideoData[]>([]);
+    const [comments, setComments] = useState<CommentData[]>([]);
     const [chartData, setChartData] = useState<ChartData[]>([]);
 
     const [aiInsights, setAIInsights] = useState<AIInsights | undefined>(undefined);
@@ -152,6 +153,7 @@ const App: React.FC = () => {
                 status: 'Public'
             }));
             setVideos(processedVideos);
+            setComments(data.comments || []);
 
             // 3. AI Insights
             setAIInsights(data.ai_insights);
@@ -425,6 +427,48 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 );
+
+            case 'Comments':
+                return (
+                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                            <h3 className="font-bold text-lg text-gray-900">{t.nav.comments}</h3>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-gray-50 text-gray-500 text-[10px] font-bold uppercase tracking-wider">
+                                    <tr>
+                                        <th className="px-4 py-3 text-gray-900 w-[50%]">{t.table.comment}</th>
+                                        <th className="px-4 py-3 text-gray-900 w-[30%]">{t.table.videoName}</th>
+                                        <th className="px-4 py-3 text-gray-900 w-[20%]">{t.table.date}</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50 text-[11px]">
+                                    {comments.map(c => (
+                                        <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-4 py-3 text-gray-800 font-medium">
+                                                <div className="line-clamp-2" title={c.text}>{c.text}</div>
+                                                <div className="text-[10px] text-gray-400 mt-1 font-normal">{c.author}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-600 truncate max-w-[200px]" title={c.videoTitle}>
+                                                {c.videoTitle}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-400 font-mono text-[10px]">{c.date}</td>
+                                        </tr>
+                                    ))}
+                                    {comments.length === 0 && (
+                                        <tr>
+                                            <td colSpan={3} className="px-4 py-8 text-center text-gray-400">
+                                                No comments found recently.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+
             case 'Analytics':
                 const combinedData = getPredictionChartData();
                 const isPredictionAvailable = !!predictionData;
@@ -536,6 +580,7 @@ const App: React.FC = () => {
                     <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
                         <NavItem label={t.nav.dashboard} active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} icon={null} />
                         <NavItem label={t.nav.content} active={activeTab === 'Content'} onClick={() => setActiveTab('Content')} icon={null} />
+                        <NavItem label={t.nav.comments} active={activeTab === 'Comments'} onClick={() => setActiveTab('Comments')} icon={null} />
                         <NavItem label={t.nav.analytics} active={activeTab === 'Analytics'} onClick={() => setActiveTab('Analytics')} icon={null} />
                     </nav>
 
@@ -566,8 +611,9 @@ const App: React.FC = () => {
                         <p className="text-gray-500 font-medium mt-1">
                             {activeTab === 'Dashboard' ? t.subtitles.dashboard :
                                 activeTab === 'Content' ? t.subtitles.contents :
-                                    activeTab === 'Analytics' ? t.subtitles.analytics :
-                                        t.subtitles.dashboard}
+                                    activeTab === 'Comments' ? t.subtitles.comments :
+                                        activeTab === 'Analytics' ? t.subtitles.analytics :
+                                            t.subtitles.dashboard}
                         </p>
                         {stats?.lastUpdated && (
                             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">

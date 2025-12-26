@@ -11,6 +11,7 @@ export const translations = {
         nav: {
             dashboard: "Dashboard",
             content: "Contents",
+            comments: "Comments",
             analytics: "Prediction",
             earn: "Earn",
             customization: "Customization"
@@ -20,6 +21,7 @@ export const translations = {
         subtitles: {
             dashboard: "Manage your channel performance and strategy.",
             contents: "Manage and optimize your video library and metadata.",
+            comments: "View and manage your channel's latest comments.",
             analytics: "Forecast your channel's growth for the next 30 days with AI predictions."
         },
 
@@ -87,7 +89,10 @@ export const translations = {
             views: "Views",
             likes: "Likes",
             dislikes: "Dislikes",
-            revenue: "Revenue"
+            revenue: "Revenue",
+            comment: "Comment",
+            videoName: "Video Name",
+            date: "Date"
         },
 
         // Footer & Legal
@@ -151,6 +156,7 @@ export const translations = {
         nav: {
             dashboard: "대시보드",
             content: "콘텐츠",
+            comments: "댓글",
             analytics: "미래 예측",
             earn: "수익 창출",
             customization: "맞춤 설정"
@@ -160,6 +166,7 @@ export const translations = {
         subtitles: {
             dashboard: "채널 성과 분석 및 전략 관리",
             contents: "동영상 라이브러리 및 메타데이터를 효율적으로 관리하세요.",
+            comments: "채널의 최근 댓글을 확인하고 관리하세요.",
             analytics: "AI 예측을 통해 향후 30일간의 채널 성장을 미리 확인하세요."
         },
 
@@ -225,7 +232,10 @@ export const translations = {
             views: "조회수",
             likes: "좋아요",
             dislikes: "싫어요",
-            revenue: "수익"
+            revenue: "수익",
+            comment: "댓글",
+            videoName: "동영상",
+            date: "날짜"
         },
 
         // Footer & Legal

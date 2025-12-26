@@ -145,7 +145,31 @@ def fetch_all_videos(youtube, channel_id):
             
     return videos_enriched
 
-# --- Analytics API Wrappers ---
+def fetch_comments(youtube, channel_id):
+    print("Fetching Comments...")
+    try:
+        req = youtube.commentThreads().list(
+            part="snippet",
+            allThreadsRelatedToChannelId=channel_id,
+            maxResults=50,
+            order="time"
+        )
+        res = req.execute()
+        comments = []
+        for item in res.get('items', []):
+            top = item['snippet']['topLevelComment']['snippet']
+            comments.append({
+                'id': top['id'],
+                'video_id': top.get('videoId'), # Can be channel comment (None) or video comment
+                'text': top['textDisplay'],
+                'author': top['authorDisplayName'],
+                'published_at': top['publishedAt'],
+                'likes': top['likeCount']
+            })
+        return comments
+    except Exception as e:
+        print(f"Error fetching comments: {e}")
+        return []
 
 def robust_analytics_query(analytics, **kwargs):
     """Wrapper to handle retries or missing metrics (e.g. revenue) gracefully."""
@@ -214,6 +238,28 @@ def upsert_videos(session, channel_id, video_list):
             
         db_vid.video_length = v.get('duration', '')
         db_vid.is_shorts = v.get('is_shorts', False)
+
+def upsert_comments(session, comments):
+    for c in comments:
+        if not c.get('video_id'): continue
+        
+        # Ensure video exists (sometimes comments exist for videos we haven't synced if very old?)
+        # But we create video placeholders if needed or skip? 
+        # Better to skip if video doesn't exist to maintain integrity, or upsert video ID only.
+        
+        # Check if exists
+        db_comment = session.query(Comment).get(c['id'])
+        if not db_comment:
+            db_comment = Comment(id=c['id'], video_id=c['video_id'])
+            session.add(db_comment)
+            
+        db_comment.text = c['text']
+        db_comment.author_name = c['author']
+        db_comment.like_count = c['likes']
+        try:
+            db_comment.published_at = datetime.datetime.strptime(c['published_at'], "%Y-%m-%dT%H:%M:%SZ")
+        except:
+            pass
 
 def upsert_video_daily(session, video_id, daily_res):
     if not daily_res.get('rows'): return
@@ -732,6 +778,19 @@ def generate_frontend_json(session, channel_id):
             }
         }
 
+    # 7. Recent Comments
+    recent_comments = session.query(Comment).join(Video).order_by(Comment.published_at.desc()).limit(50).all()
+    comments_json = []
+    for c in recent_comments:
+        comments_json.append({
+            "id": c.id,
+            "text": c.text,
+            "author": c.author_name,
+            "date": c.published_at.strftime("%Y-%m-%d"),
+            "likes": c.like_count,
+            "videoTitle": c.video.title if c.video else "Unknown Video"
+        })
+
     # Final Output
     final_json = {
         "summary": summary,
@@ -740,7 +799,8 @@ def generate_frontend_json(session, channel_id):
         "ai_insights": ai_insights,
         "top_videos": top_videos_list,
         "demographics": demographics,
-        "traffic_sources": traffic_out
+        "traffic_sources": traffic_out,
+        "comments": comments_json
     }
     
     with open(config.DASHBOARD_DATA_FILE, 'w') as f:
@@ -809,6 +869,11 @@ def main():
     # 4. Videos List
     videos = fetch_all_videos(youtube, cid)
     upsert_videos(session, cid, videos)
+    session.commit()
+    
+    # 4b. Comments
+    comments = fetch_comments(youtube, cid)
+    upsert_comments(session, comments)
     session.commit()
     
     # 5. Video Daily Stats (Iterate)
