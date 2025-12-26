@@ -217,7 +217,9 @@ const App: React.FC = () => {
         if (!predictionData.predictions || !predictionData.predictions[predictionModel]) return history;
 
         const predDates = predictionData.dates;
-        const metricKey = selectedMetric === 'views' ? 'view_count' : selectedMetric === 'subscribers' ? 'subscriber_count' : 'revenue';
+        let metricKey = selectedMetric === 'views' ? 'view_count' : selectedMetric === 'subscribers' ? 'subscriber_count' : selectedMetric === 'revenue' ? 'revenue' : selectedMetric === 'watchTime' ? 'watch_time' : selectedMetric;
+        if (selectedMetric === 'likes') metricKey = 'likes';
+        if (selectedMetric === 'dislikes') metricKey = 'dislikes';
         const predValues = predictionData.predictions[predictionModel][metricKey];
 
         if (!predValues) return history;
@@ -447,7 +449,9 @@ const App: React.FC = () => {
                                             <option value="views">{t.metrics.views}</option>
                                             <option value="subscribers">{t.metrics.subscribers}</option>
                                             <option value="revenue">{t.metrics.revenue}</option>
-                                            {/* Prediction usually only makes sense for these 3 for now */}
+                                            <option value="watchTime">{t.metrics.watchTime}</option>
+                                            <option value="likes">{t.metrics.likes}</option>
+                                            <option value="dislikes">{t.metrics.dislikes}</option>
                                         </select>
                                     </div>
 

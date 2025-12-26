@@ -34,7 +34,13 @@ def fetch_data():
     # Based on previous `fetch_data.py`, we track daily stats in `channel_stats` (daily snapshot)
     
     query = """
-        SELECT date, views as view_count, subscribers_gained as subscriber_count, estimated_revenue as revenue
+        SELECT date, 
+               views as view_count, 
+               subscribers_gained as subscriber_count, 
+               estimated_revenue as revenue,
+               watch_time_minutes as watch_time,
+               likes,
+               dislikes
         FROM channel_daily_stats
         ORDER BY date ASC
     """
@@ -152,7 +158,7 @@ def generate_predictions():
     df = df.sort_values('date')
     
     # Metrics to predict
-    metrics = ['view_count', 'subscriber_count', 'revenue']
+    metrics = ['view_count', 'subscriber_count', 'revenue', 'watch_time', 'likes', 'dislikes']
     
     output = {
         "last_updated": datetime.now().isoformat(),
@@ -179,15 +185,24 @@ def generate_predictions():
         
         # 1. MA
         ma_pred = moving_average_forecast(series, window=7, horizon=DAYS_TO_PREDICT)
-        output['predictions']['ma'][metric] = [max(0, round(x)) if metric != 'revenue' else max(0, round(x, 2)) for x in ma_pred]
+        if metric in ['revenue', 'watch_time']:
+             output['predictions']['ma'][metric] = [max(0, round(x, 2)) for x in ma_pred]
+        else:
+             output['predictions']['ma'][metric] = [max(0, round(x)) for x in ma_pred]
         
         # 2. WMA
         wma_pred = weighted_moving_average_forecast(series, window=30, horizon=DAYS_TO_PREDICT)
-        output['predictions']['wma'][metric] = [max(0, round(x)) if metric != 'revenue' else max(0, round(x, 2)) for x in wma_pred]
+        if metric in ['revenue', 'watch_time']:
+             output['predictions']['wma'][metric] = [max(0, round(x, 2)) for x in wma_pred]
+        else:
+             output['predictions']['wma'][metric] = [max(0, round(x)) for x in wma_pred]
         
         # 3. XGBoost
         xgb_pred = xgboost_forecast(df, metric, horizon=DAYS_TO_PREDICT)
-        output['predictions']['xgboost'][metric] = [max(0, round(x)) if metric != 'revenue' else max(0, round(x, 2)) for x in xgb_pred]
+        if metric in ['revenue', 'watch_time']:
+             output['predictions']['xgboost'][metric] = [max(0, round(x, 2)) for x in xgb_pred]
+        else:
+             output['predictions']['xgboost'][metric] = [max(0, round(x)) for x in xgb_pred]
 
     # Save to JSON
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:

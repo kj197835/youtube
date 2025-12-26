@@ -92,16 +92,25 @@ export interface PredictionData {
             view_count: number[];
             subscriber_count: number[];
             revenue: number[];
+            watch_time: number[];
+            likes: number[];
+            dislikes: number[];
         };
         wma: {
             view_count: number[];
             subscriber_count: number[];
             revenue: number[];
+            watch_time: number[];
+            likes: number[];
+            dislikes: number[];
         };
         xgboost: {
             view_count: number[];
             subscriber_count: number[];
             revenue: number[];
+            watch_time: number[];
+            likes: number[];
+            dislikes: number[];
         };
     };
 }
