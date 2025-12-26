@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { ChannelStats, VideoData, AIInsight, ChartData, AppTab, DashboardData } from './types';
-import { getCreatorInsights } from './services/geminiService';
+import { ChannelStats, VideoData, AIInsights, ChartData, AppTab, DashboardData, PredictionData } from './types';
 import StatsCard from './components/StatsCard';
 import InsightSection from './components/InsightSection';
 import { translations, Language } from './translations';
+import { TrendingUp } from 'lucide-react';
+
 
 const NavItem: React.FC<{ label: string; active: boolean; onClick: () => void; icon: React.ReactNode }> = ({ label, active, onClick, icon }) => (
     <button
@@ -37,9 +38,13 @@ const App: React.FC = () => {
     const [videos, setVideos] = useState<VideoData[]>([]);
     const [chartData, setChartData] = useState<ChartData[]>([]);
 
-    const [insights, setInsights] = useState<AIInsight[]>([]);
+    const [aiInsights, setAIInsights] = useState<AIInsights | undefined>(undefined);
     const [loadingData, setLoadingData] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
+
+    // Prediction State
+    const [predictionModel, setPredictionModel] = useState<'ma' | 'wma' | 'xgboost'>('wma');
+    const [predictionData, setPredictionData] = useState<PredictionData | null>(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -51,7 +56,8 @@ const App: React.FC = () => {
     const fetchData = async () => {
         try {
             setLoadingData(true);
-            const res = await fetch('./dashboard_data.json');
+            // Cache busting
+            const res = await fetch(`./dashboard_data.json?t=${new Date().getTime()}`);
             if (!res.ok) {
                 throw new Error("Failed to load data");
             }
@@ -131,26 +137,41 @@ const App: React.FC = () => {
             }
 
             // 2. Process Videos
-            const processedVideos: VideoData[] = data.top_videos.map((v, i) => ({
+            const processedVideos: VideoData[] = data.top_videos.map((v: any, i) => ({
                 id: v.video || `v-${i}`,
-                title: (v as any).title || `Unknown Video (${v.video})`,
-                thumbnail: (v as any).thumbnail || '',
+                title: v.title || `Unknown Video (${v.video})`,
+                thumbnail: v.thumbnail || '',
                 publishedAt: 'Recent',
                 views: v.views,
-                likes: (v as any).likes || 0,
-                dislikes: (v as any).dislikes || 0,
-                revenue: (v as any).estimatedRevenue || 0,
-                comments: (v as any).comments || 0,
+                likes: v.likes || 0,
+                dislikes: v.dislikes || 0,
+                revenue: v.estimatedRevenue || 0,
+                comments: v.comments || 0,
                 retentionRate: 50,
                 status: 'Public'
             }));
             setVideos(processedVideos);
+
+            // 3. AI Insights
+            setAIInsights(data.ai_insights);
+
+            // 4. Prediction Data
+            try {
+                const predRes = await fetch(`./prediction_data.json?t=${new Date().getTime()}`);
+                if (predRes.ok) {
+                    setPredictionData(await predRes.json());
+                }
+            } catch (e) {
+                console.error("Failed to load predictions", e);
+            }
+
             setLoadingData(false);
 
-            fetchInsights(calculatedStats, processedVideos);
+            // No longer fetching deprecated insights
+            // fetchInsights(calculatedStats, processedVideos);
 
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error("Error fetching data:", error);
             setLoadingData(false);
         }
     };
@@ -166,87 +187,147 @@ const App: React.FC = () => {
         });
     };
 
+    /* Deprecated
     const fetchInsights = useCallback(async (currentStats: ChannelStats, recentVideos: VideoData[]) => {
         const data = await getCreatorInsights(currentStats, recentVideos);
         setInsights(data);
     }, []);
+    */
 
     useEffect(() => {
         fetchData();
-    }, [timeRange]);
+        const interval = setInterval(fetchData, 1000 * 60 * 60); // Refresh every hour
+        return () => clearInterval(interval);
+    }, [timeRange]); // Dependency on timeRange to refetch/recalc if needed
+
+    const getPredictionChartData = () => {
+        if (!predictionData || !stats) return [];
+
+        // 1. History (Last 30 days)
+        // We use 'displayChartData' which is already processed for the chart
+        // But we need to make sure keys match
+        const history = chartData.map(d => ({
+            name: d.name,
+            history: d[selectedMetric] || 0,
+            forecast: undefined as number | undefined
+        }));
+
+        // 2. Forecast
+        if (!predictionData.predictions || !predictionData.predictions[predictionModel]) return history;
+
+        const predDates = predictionData.dates;
+        const metricKey = selectedMetric === 'views' ? 'view_count' : selectedMetric === 'subscribers' ? 'subscriber_count' : 'revenue';
+        const predValues = predictionData.predictions[predictionModel][metricKey];
+
+        if (!predValues) return history;
+
+        const forecast = predDates.map((date, i) => ({
+            name: date,
+            history: undefined as number | undefined,
+            forecast: predValues[i]
+        }));
+
+        // Connect the lines: Add the last history point as the first forecast point
+        if (history.length > 0) {
+            const lastHistory = history[history.length - 1];
+            forecast.unshift({
+                name: lastHistory.name,
+                history: undefined,
+                forecast: lastHistory.history
+            });
+        }
+
+        return [...history, ...forecast];
+    };
 
     const rangeLabel = timeRange === 'Daily' ? '(30d)' : timeRange === 'Weekly' ? '(30w)' : '(30m)';
     const displayChartData = getDisplayChartData();
 
-    const renderContent = () => {
-        if (loadingData) return <div className="p-20 text-center text-gray-400">{t.loading}</div>;
+    if (loadingData && !stats) return <div className="flex items-center justify-center h-screen bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div></div>;
 
+    const renderContent = () => {
         switch (activeTab) {
             case 'Dashboard':
                 return (
-                    <div className="space-y-8">
+                    <div className="space-y-6">
+                        {/* Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            <StatsCard label={`${t.stats.views} ${rangeLabel}`} value={stats?.viewCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>} />
-                            <StatsCard label={`${t.stats.subscribers} ${rangeLabel}`} value={stats?.subscriberCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>} />
-                            <StatsCard label={`Likes ${rangeLabel}`} value={stats?.likes.toLocaleString() || '-'} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>} />
-                            <StatsCard label={t.stats.watchTime} value={stats?.watchTimeHours.toLocaleString() || '-'} change="-" isPositive={false} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
-                            <StatsCard label={t.stats.engagement} value={`${stats?.avgEngagementRate}%`} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>} />
-                            <StatsCard label={`${t.stats.revenue} ${rangeLabel}`} value={`$${stats?.revenue.toFixed(2) || '0.00'}`} change="-" isPositive={true} icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
-                        </div>
-                        <div className="bg-white p-4 sm:p-8 rounded-3xl border border-gray-100 shadow-sm min-h-0 sm:min-h-[500px]">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-gray-900">{t.sections.growth} ({timeRange})</h3>
-                                <div className="flex items-center gap-3">
-                                    <div className="relative inline-block text-left">
-                                        <select
-                                            value={selectedMetric}
-                                            onChange={(e) => setSelectedMetric(e.target.value as any)}
-                                            className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer capitalize"
-                                        >
-                                            <option value="views">{t.metrics.views}</option>
-                                            <option value="watchTime">{t.metrics.watchTime}</option>
-                                            <option value="subscribers">{t.metrics.subscribers}</option>
-                                            <option value="revenue">{t.metrics.revenue}</option>
-                                            <option value="likes">{t.metrics.likes}</option>
-                                            <option value="dislikes">{t.metrics.dislikes}</option>
-                                        </select>
-                                    </div>
-                                    <div className="relative inline-block text-left">
-                                        <select
-                                            value={chartType}
-                                            onChange={(e) => setChartType(e.target.value as any)}
-                                            className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer"
-                                        >
-                                            <option value="Daily">{t.chartType.changes}</option>
-                                            <option value="Cumulative">{t.chartType.cumulative}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="h-[65vw] sm:h-[400px]">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    {chartType === 'Daily' ? (
-                                        <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                            <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                            <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
-                                        </BarChart>
-                                    ) : (
-                                        <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                            <Area type="monotone" dataKey={selectedMetric} stroke="#ef4444" fill="#fee2e2" strokeWidth={3} />
-                                        </AreaChart>
-                                    )}
-                                </ResponsiveContainer>
-                            </div>
+                            <StatsCard label={`${t.stats.views} ${rangeLabel}`} value={stats?.viewCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">👁️</span>} />
+                            <StatsCard label={`${t.stats.subscribers} ${rangeLabel}`} value={stats?.subscriberCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">👥</span>} />
+                            <StatsCard label={`Likes ${rangeLabel}`} value={stats?.likes.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">❤️</span>} />
+                            <StatsCard label={t.stats.watchTime} value={stats?.watchTimeHours.toLocaleString() || '-'} change="-" isPositive={false} icon={<span className="text-xl">⏱️</span>} />
+                            <StatsCard label={t.stats.engagement} value={`${stats?.avgEngagementRate}%`} change="-" isPositive={true} icon={<span className="text-xl">💬</span>} />
+                            <StatsCard label={`${t.stats.revenue} ${rangeLabel}`} value={`$${stats?.revenue.toFixed(2) || '0.00'}`} change="-" isPositive={true} icon={<span className="text-xl">💰</span>} />
                         </div>
 
-                        <InsightSection insights={insights} title={t.sections.aiInsights} />
+                        {/* Charts Area */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm lg:col-span-3"> {/* Expanded chart */}
+                                <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+                                    <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
+                                        <TrendingUp className="w-5 h-5 text-red-500" /> {t.sections.performance}
+                                    </h3>
+                                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                                        <div className="relative inline-block text-left">
+                                            <select
+                                                value={selectedMetric}
+                                                onChange={(e) => setSelectedMetric(e.target.value as any)}
+                                                className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer capitalize"
+                                            >
+                                                <option value="views">{t.metrics.views}</option>
+                                                <option value="watchTime">{t.metrics.watchTime}</option>
+                                                <option value="subscribers">{t.metrics.subscribers}</option>
+                                                <option value="revenue">{t.metrics.revenue}</option>
+                                                <option value="likes">{t.metrics.likes}</option>
+                                                <option value="dislikes">{t.metrics.dislikes}</option>
+                                            </select>
+                                        </div>
+                                        <div className="relative inline-block text-left">
+                                            <select
+                                                value={chartType}
+                                                onChange={(e) => setChartType(e.target.value as any)}
+                                                className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer"
+                                            >
+                                                <option value="Daily">{t.chartType.changes}</option>
+                                                <option value="Cumulative">{t.chartType.cumulative}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="h-[65vw] sm:h-[400px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        {chartType === 'Daily' ? (
+                                            <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                                <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
+                                            </BarChart>
+                                        ) : (
+                                            <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                                <Area type="monotone" dataKey={selectedMetric} stroke="#ef4444" fill="#fee2e2" strokeWidth={3} />
+                                            </AreaChart>
+                                        )}
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            <div className="col-span-1 lg:col-span-3 space-y-6"> {/* Full width for AI Insights */}
+                                {/* Current Analysis */}
+                                {aiInsights?.current_analysis && (
+                                    <InsightSection
+                                        data={aiInsights.current_analysis}
+                                        title={t.sections.aiInsights}
+                                        variant="current"
+                                    />
+                                )}
+                            </div>
+                        </div>
                     </div>
                 );
             case 'Content':
@@ -310,34 +391,43 @@ const App: React.FC = () => {
                     </div>
                 );
             case 'Analytics':
+                const combinedData = getPredictionChartData();
+                const isPredictionAvailable = !!predictionData;
+
                 return (
                     <div className="space-y-6">
                         <div className="bg-white p-4 sm:p-8 rounded-3xl border border-gray-100 shadow-sm min-h-0 sm:min-h-[500px]">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-gray-900">{t.sections.detailedAnalytics} ({timeRange})</h3>
-                                <div className="flex items-center gap-3">
-                                    <div className="relative inline-block text-left">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900">{t.sections.detailedAnalytics}</h3>
+                                    <p className="text-sm text-gray-500 mt-1 font-medium bg-red-50 text-red-600 inline-block px-2 py-1 rounded-md">
+                                        {t.sections.predictionDisclaimer}
+                                    </p>
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                                    <div className="relative inline-block text-left w-full sm:w-auto">
                                         <select
                                             value={selectedMetric}
                                             onChange={(e) => setSelectedMetric(e.target.value as any)}
                                             className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer capitalize"
                                         >
                                             <option value="views">{t.metrics.views}</option>
-                                            <option value="watchTime">{t.metrics.watchTime}</option>
                                             <option value="subscribers">{t.metrics.subscribers}</option>
                                             <option value="revenue">{t.metrics.revenue}</option>
-                                            <option value="likes">{t.metrics.likes}</option>
-                                            <option value="dislikes">{t.metrics.dislikes}</option>
+                                            {/* Prediction usually only makes sense for these 3 for now */}
                                         </select>
                                     </div>
-                                    <div className="relative inline-block text-left">
+
+                                    {/* Prediction Model Selector */}
+                                    <div className="relative inline-block text-left w-full sm:w-auto">
                                         <select
-                                            value={chartType}
-                                            onChange={(e) => setChartType(e.target.value as any)}
-                                            className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer"
+                                            value={predictionModel}
+                                            onChange={(e) => setPredictionModel(e.target.value as any)}
+                                            className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-blue-50 border border-blue-200 text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg shadow-sm appearance-none cursor-pointer"
                                         >
-                                            <option value="Daily">{t.chartType.changes}</option>
-                                            <option value="Cumulative">{t.chartType.cumulative}</option>
+                                            <option value="wma">{t.predictionModels.wma}</option>
+                                            <option value="ma">{t.predictionModels.ma}</option>
+                                            <option value="xgboost">{t.predictionModels.xgboost}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -352,30 +442,45 @@ const App: React.FC = () => {
                             ) : (
                                 <div className="h-[65vw] sm:h-[400px]">
                                     <ResponsiveContainer width="100%" height="100%">
-                                        {chartType === 'Daily' ? (
-                                            <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
-                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                                <Tooltip cursor={{ fill: '#f3f4f6' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                                <Bar dataKey={selectedMetric} fill="#ef4444" radius={[4, 4, 0, 0]} />
-                                            </BarChart>
-                                        ) : (
-                                            <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
-                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
-                                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                                <Area type="monotone" dataKey={selectedMetric} stroke="#ef4444" fill="#fee2e2" strokeWidth={3} />
-                                            </AreaChart>
-                                        )}
+                                        <AreaChart data={combinedData} margin={{ top: 10, right: 10, left: isMobile ? -35 : -20, bottom: 0 }}>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} minTickGap={30} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+
+                                            {/* History Area */}
+                                            <Area type="monotone" dataKey="history" stroke="#ef4444" fill="#fee2e2" strokeWidth={3} name="History" />
+
+                                            {/* Forecast Area (Dashed) */}
+                                            <Area type="monotone" dataKey="forecast" stroke="#3b82f6" fill="url(#colorForecast)" strokeWidth={3} strokeDasharray="5 5" name="Forecast" />
+
+                                            <defs>
+                                                <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                        </AreaChart>
                                     </ResponsiveContainer>
                                 </div>
                             )}
                         </div>
-                        <InsightSection insights={insights} title="AI Prediction Insights" />
+
+                        {/* Future Growth Strategy (Prediction Data) */}
+                        {aiInsights?.future_strategy && (
+                            <InsightSection
+                                data={aiInsights.future_strategy}
+                                title="Future Growth Strategy"
+                                variant="future"
+                            />
+                        )}
+
+                        {/* Combined Chart */}
+                        <div className="bg-white p-4 sm:p-8 rounded-3xl border border-gray-100 shadow-sm min-h-0 sm:min-h-[500px]"></div>
                     </div>
                 );
+            case 'Earn':
+            case 'Customization':
                 return <div className="p-20 text-center text-gray-400">{t.sectionComingSoon}</div>;
         }
     };
@@ -435,7 +540,7 @@ const App: React.FC = () => {
                         )}
                     </div>
 
-                    {activeTab !== 'Earn' && activeTab !== 'Customization' && (
+                    {activeTab !== 'Earn' && activeTab !== 'Customization' && activeTab !== 'Analytics' && (
                         <div className="relative inline-block text-left">
                             <select
                                 value={timeRange}

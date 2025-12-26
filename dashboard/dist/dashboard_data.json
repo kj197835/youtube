@@ -2,13 +2,13 @@
     "summary": {
         "channel_name": "AI Sound Lab",
         "profile_image": null,
-        "total_views_30d": 170,
+        "total_views_30d": 174,
         "estimated_revenue_30d": 0.0,
         "subs_gained_30d": 3,
         "total_watch_time_hours_30d": 2,
         "likes_30d": 7,
         "avg_engagement_rate_30d": 0.0,
-        "last_updated": "2025-12-23 06:00:08"
+        "last_updated": "2025-12-25 15:00:12"
     },
     "trends": {
         "daily": {
@@ -1107,7 +1107,9 @@
                 "2025-12-17",
                 "2025-12-18",
                 "2025-12-19",
-                "2025-12-20"
+                "2025-12-20",
+                "2025-12-21",
+                "2025-12-22"
             ],
             "views": [
                 0,
@@ -2204,9 +2206,13 @@
                 9,
                 3,
                 1,
-                0
+                0,
+                0,
+                4
             ],
             "revenue": [
+                0.0,
+                0.0,
                 0.0,
                 0.0,
                 0.0,
@@ -4398,6 +4404,8 @@
                 0,
                 0,
                 0,
+                0,
+                0,
                 0
             ],
             "likes": [
@@ -5495,6 +5503,8 @@
                 0,
                 0,
                 0,
+                0,
+                0,
                 0
             ],
             "comments": [
@@ -6575,6 +6585,8 @@
                 0,
                 0,
                 1,
+                0,
+                0,
                 0,
                 0,
                 0,
@@ -7689,7 +7701,9 @@
                 19.0,
                 25.0,
                 28.0,
-                0.0
+                0.0,
+                0.0,
+                189.0
             ],
             "estimatedMinutesWatched": [
                 0.0,
@@ -8786,7 +8800,9 @@
                 2.0,
                 1.0,
                 0.0,
-                0.0
+                0.0,
+                0.0,
+                12.0
             ]
         },
         "weekly": {
@@ -9106,7 +9122,7 @@
                 0,
                 116,
                 38,
-                16
+                20
             ],
             "revenue": [
                 0.0,
@@ -9901,7 +9917,7 @@
                 0.0,
                 330.0,
                 470.0,
-                124.0
+                313.0
             ],
             "estimatedMinutesWatched": [
                 0.0,
@@ -10060,7 +10076,7 @@
                 0.0,
                 103.0,
                 57.0,
-                5.0
+                17.0
             ]
         },
         "monthly": {
@@ -10140,7 +10156,7 @@
                 0,
                 0,
                 0,
-                170
+                174
             ],
             "revenue": [
                 0.0,
@@ -10335,7 +10351,7 @@
                 0.0,
                 0.0,
                 0.0,
-                924.0
+                1113.0
             ],
             "estimatedMinutesWatched": [
                 0.0,
@@ -10374,7 +10390,7 @@
                 0.0,
                 0.0,
                 0.0,
-                165.0
+                177.0
             ]
         }
     },
@@ -10382,12 +10398,27 @@
         "dates": [],
         "views": []
     },
+    "ai_insights": {
+        "strengths": {
+            "title": "**\uc131\uacfc**",
+            "content": "AI Sound Lab\uc740 AI \uc74c\uc6d0 \ubc0f \uc0ac\uc6b4\ub4dc \ub514\uc790\uc778 \uad00\ub828 \ucf58\ud150\uce20\ub97c \ub2e4\ub8e8\uace0 \uc788\uc5b4, \uc8fc\uc81c\ubcc4\ub85c \ud2b9\ud654\ub41c \ucc44\ub110\ub85c \uc874\uc7ac\ud569\ub2c8\ub2e4. \ub610\ud55c, 174\ubdf0\uc640 3\uba85\uc758 \uc0c8\ub85c\uc6b4 \uad6c\ub3c5\uc790 \uc218\ub294 \uc0c1\ub300\uc801\uc73c\ub85c \ub0ae\uc9c0\ub9cc, \uc131\uc7a5 \uac00\ub2a5\uc131\uc774 \uc788\uc2b5\ub2c8\ub2e4."
+        },
+        "improvements": {
+            "title": "**\uac1c\uc120\uc810**",
+            "content": "AI Sound Lab\uc740 \ud604 \uc2dc\uc810\uc5d0\uc11c \uc804\ubc18\uc801\uc778 \ucc44\ub110 \uc131\uc7a5\uc740 \ubbf8\uc57d\ud558\ub2e4\uace0 \ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. \ub530\ub77c\uc11c, \ucf58\ud150\uce20 \ub2e4\uc591\uc131, \uc801\uadf9\uc801\uc778 \ub9c8\ucf00\ud305 \ubc0f \ud30c\ud2b8\ub108\uc2ed \uad6c\ucd95\uc744 \ud1b5\ud574 \uc131\uc7a5\uc744 \ucd09\uc9c4\ud574\uc57c \ud569\ub2c8\ub2e4."
+        },
+        "action_plan": {
+            "title": "**\ud589\ub3d9 \uacc4\ud68d**",
+            "content": "1. \ucf58\ud150\uce20 \ub2e4\uc6d0\ud654: AI Sound Lab\uc740 \ub2e4\uc591\ud55c \uc18c\ub9ac\ub97c \ubc14\ud0d5\uc73c\ub85c \uc0c8\ub85c\uc6b4 \uc74c\uc545, \ud6a8\uacfc\uc74c \ubc0f \uc0ac\uc6b4\ub4dc \ub514\uc790\uc778 \ucf58\ud150\uce20\ub97c \ucd94\uac00\ud574 \ubcf4\ub294 \uac83\uc774 \uc88b\uc2b5\ub2c8\ub2e4. \ub610\ud55c, AI-generated \uc74c\uc545\uc5d0 \ub300\ud55c \ucf58\ud150\uce20\ub3c4 \uac1c\ubc1c\ud558\uc5ec \uc2dc\ub3c4\ub97c \ud574\ubcf4\uc138\uc694.\n2. \ub9c8\ucf00\ud305 \uae30\ubc95 \uac15\ud654: NoCopyrightSounds\uc640 Lofi Girl\uc758 \uc131\uacf5\uc801\uc778 \ub9c8\ucf00\ud305 \uc804\ub7b5\uc744 \ucc38\uace0\ud558\uc5ec, \uc778\ud50c\ub8e8\uc5b8\uc11c \ud611\uc57d \ubc0f \uc720\ud29c\ube0c AD\ub97c \ud65c\ubc1c\ud788 \uc0ac\uc6a9\ud574 \ubcf4\ub294 \uac83\uc774 \uc88b\uc2b5\ub2c8\ub2e4.\n3. \ud30c\ud2b8\ub108\uc2ed \ucd94\uc9c4: Music\uc640 NoCopyrightSounds\uac00 \ud30c\ud2b8\ub108\uc27d\uc744 \ud1b5\ud574 \ud6a8\uacfc\uc801\uc73c\ub85c \uc131\uc7a5\uc744 \uc774\ub04c\uc5b4\ub0b4\uace0 \uc788\ub2e4\uba74, AI Sound Lab\ub3c4 \uac19\uc740 \ubc29\uc2dd\uc73c\ub85c \ud30c\ud2b8\ub108\uc2ed\uc744 \ub9fa\uc5b4\uac00\uba70 \ud611\ub825 \ud504\ub85c\uc81d\ud2b8\ub97c \uc9c4\ud589\ud574 \ubcf4\uc138\uc694."
+        },
+        "detailed_report": "**## \uc0c1\uc138 \ubd84\uc11d**\n\n### \uacbd\uc7c1\uc790 \ube44\uad50\n\n#### NoCopyrightSounds\uc640 Lofi Girl\n\nNoCopyrightSounds\uc640 Lofi Girl\uc758 \uc8fc\uc694 \uc131\uacfc\ub294 \uc720\ud29c\ube0c \uc2dc\uccad\uc790\ub4e4\uc758 \uc778\uc0dd\uc758 \uc18c\uc18c\ud55c \ubd84\uc704\uae30\uc5d0 \uc5b4\uc6b8\ub9ac\ub294 \uc74c\uc545\uc73c\ub85c, \uac10\uc131\uc744 \uc790\uadf9\ud558\ub294 \uc0ac\uc6b4\ub4dc \ub514\uc790\uc778 \ubc0f \uc74c\uc545\uc744 \uc81c\uacf5\ud558\ub294 \uac83\uc785\ub2c8\ub2e4. \ub610\ud55c, \uc774 \ub450 \ucc44\ub110\uc740 \ub9e4\uc77c \uc0c8\ub85c\uc6b4 \uace1\uc744 \uc5c5\ub85c\ub4dc\ud558\uba70, \uc2dc\uccad\uc790\uc758 \ucc38\uc5ec\ub97c \uc704\ud55c \ub2e4\uc591\ud55c \ud65c\ub3d9\ub3c4 \uc9c4\ud589\ud569\ub2c8\ub2e4.\n\n#### Music \ucc44\ub110\n\nMusic \ucc44\ub110\uc740 \uc720\uba85\ud55c \uc544\ud2f0\uc2a4\ud2b8\uc758 \ucf58\ud150\uce20\ub97c \uc218\ub85d\ud558\uace0 \uc788\uc73c\uba70, \ub2e4\uc591\ud55c \uc7a5\ub974\uc758 \uc74c\uc545\uc5d0 \ub300\ud55c \ucf58\ud150\uce20\ub97c \uc81c\uacf5\ud558\ub294 \uac83\ub9cc\uc73c\ub85c \uc778\ub958\uc758 \ubaa8\ub4e0 \uc74c\uc545\uc801 \uac10\uc131\uc744 \ub9cc\uc871\uc2dc\ud0a4\ub294 \ub300\ud615 \ucc44\ub110\uc785\ub2c8\ub2e4.\n\n### AI Sound Lab\uacfc\uc758 \ucc28\uc774\uc810 \ubc0f \uac1c\uc120 \ubc29\uc548\n\nAI Sound Lab\uc740 AI-generated \uc74c\uc545\uc5d0 \ucd08\uc810\uc744 \ub9de\ucd98 \uc720\uc77c\ud55c \ucc44\ub110\ub85c, \ub2e4\uc591\ud55c \uc0ac\uc6b4\ub4dc \ub514\uc790\uc778\uacfc \uc74c\uc545 \ucf58\ud150\uce20\ub97c \uc81c\uacf5\ud558\ub294 \uac83\uc744 \ud2b9\uc9d5\uc73c\ub85c \ud569\ub2c8\ub2e4. \ud558\uc9c0\ub9cc \ud604\uc7ac\uc758 \uc131\uc7a5 \uc7a0\uc7ac\ub825\uc740 \uc544\uc9c1 \ubbf8\ubbf8\ud558\ub2e4\uace0 \ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n\n#### \ucd94\ucc9c \uac1c\uc120 \ubc29\uc548\n\n- **\ucf58\ud150\uce20 \ub2e4\uc591\uc131 \uac15\ud654**: AI-generated \uc74c\uc545\uc5d0 \uae30\ubc18\ud55c \uc0c8\ub85c\uc6b4 \uc18c\ub9ac\ub97c \ub2e4\uc591\ud55c \uc7a5\ub974\ub85c \ud655\uc7a5\ud574 \ubcf4\ub294 \uac83\uc774 \uc88b\uc2b5\ub2c8\ub2e4. \ub610\ud55c, \uc720\uba85 \uc544\ud2f0\uc2a4\ud2b8\uc758 \ud611\uc5c5\uc744 \ud1b5\ud574 \uace1 \uc81c\uc791\uc744 \uc9c4\ud589\ud558\uc5ec, \uc0c8\ub85c\uc6b4 \ud32c\uce35 \ud655\ubcf4\ub97c \uc704\ud55c \ub300\ucc45\uc744 \ub9c8\ub828\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n\n- **\ub9c8\ucf00\ud305 \uc804\ub7b5 \uac15\ud654**: NoCopyrightSounds\uc640 Lofi Girl\uc758 \uc131\uacf5\uc801\uc778 \ub9c8\ucf00\ud305 \uc804\ub7b5\uc744 \ucc38\uace0\ud558\uc5ec, \uc778\ud50c\ub8e8\uc5b8\uc11c \ud30c\ud2b8\ub108\uc2ed \ubc0f \uc720\ud29c\ube0c AD\uc758 \uc0ac\uc6a9\uc744 \ud65c\ubc1c\ud788 \ub3c4\uc785\ud574 \ubcf4\ub294 \uac83\uc774 \uc88b\uc2b5\ub2c8\ub2e4. \ub610\ud55c, \uc2dc\uc98c\ubcc4\ub85c \ud2b9\uc815\ud55c \uc8fc\uc81c\uc5d0 \uc9d1\uc911\ud55c \ucf58\ud150\uce20\ub97c \ubc18\ubcf5\uc801\uc73c\ub85c \uc5c5\ub85c\ub4dc\ud558\ub294 \ubc29\uc2dd\ub3c4 \uc2dc\ub3c4\ud574 \ubcfc \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n\n- **\ud30c\ud2b8\ub108\uc2ed \ucd94\uc9c4**: Music\uc640 NoCopyrightSounds\uac00 \ud30c\ud2b8\ub108\uc27d\uc744 \ud1b5\ud574 \uc131\uacf5\uc801\uc778 \uc131\uc7a5\uc744 \uc774\ub04c\uc5b4 \ub0c8\ub2e4\uba74, AI Sound Lab\ub3c4 \uac19\uc740 \ubc29\uc2dd\uc73c\ub85c \ud30c\ud2b8\ub108\uc2ed\uc744 \ub9fa\uc5b4\uac00\uba70 \ud611\ub825 \ud504\ub85c\uc81d\ud2b8\ub97c \uc9c4\ud589\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4."
+    },
     "top_videos": [
         {
             "video": "wFqzxvKPO3M",
             "title": "The Spitter - \ucc28\uac00\uc6b4 \ube44, \ub274\uc695\uc758 \uac70\ub9ac\uc5d0\uc11c \ud3ed\ubc1c\ud55c \ubd84\ub178. \uac31\uc2a4\ud130 \ud799\ud569 (Gangster Rap).",
             "thumbnail": "https://i.ytimg.com/vi/wFqzxvKPO3M/mqdefault.jpg",
-            "views": 52,
+            "views": 53,
             "likes": 1,
             "comments": 0,
             "shares": 1,
@@ -10397,7 +10428,7 @@
             "video": "8SgGs5tNmpk",
             "title": "Numb City (\ubb34\uac10\uac01\ud55c \ub3c4\uc2dc) - \ud1f4\uadfc\uae38 \uac10\uc131 AI \ud799\ud569",
             "thumbnail": "https://i.ytimg.com/vi/8SgGs5tNmpk/mqdefault.jpg",
-            "views": 40,
+            "views": 41,
             "likes": 3,
             "comments": 1,
             "shares": 4,
@@ -10417,7 +10448,7 @@
             "video": "SZocibagft4",
             "title": "In the indifferent city - \uc7bf\ube5b \ub3c4\uc2dc, \uc7a0 \ubabb \ub4dc\ub294 \ubc24 \ud83c\udf03 | AI\uc640 \ud568\uaed8\ud558\ub294 \uc6b0\uc6b8\ud55c R&B POP",
             "thumbnail": "https://i.ytimg.com/vi/SZocibagft4/mqdefault.jpg",
-            "views": 21,
+            "views": 22,
             "likes": 1,
             "comments": 0,
             "shares": 0,
@@ -10427,7 +10458,7 @@
             "video": "dOyrylMfBvg",
             "title": "Family Christmas Vibe - \ub208 \ub0b4\ub9ac\ub294 \ubc24, \uc138\uc0c1\uc5d0\uc11c \uac00\uc7a5 \ub530\ub73b\ud55c \uacf3 \ud83c\udfe0",
             "thumbnail": "https://i.ytimg.com/vi/dOyrylMfBvg/mqdefault.jpg",
-            "views": 20,
+            "views": 21,
             "likes": 1,
             "comments": 0,
             "shares": 0,
@@ -10452,8 +10483,8 @@
             "rows": [
                 [
                     "KR",
-                    92,
-                    192.0
+                    184,
+                    384.0
                 ]
             ]
         }
@@ -10461,13 +10492,13 @@
     "traffic_sources": [
         {
             "insightTrafficSourceType": "RELATED_VIDEO",
-            "views": 46,
-            "estimatedMinutesWatched": 33.0
+            "views": 49,
+            "estimatedMinutesWatched": 41.0
         },
         {
             "insightTrafficSourceType": "YT_CHANNEL",
-            "views": 33,
-            "estimatedMinutesWatched": 21.0
+            "views": 34,
+            "estimatedMinutesWatched": 24.0
         },
         {
             "insightTrafficSourceType": "SHORTS",

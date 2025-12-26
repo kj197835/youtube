@@ -11,7 +11,7 @@ export const translations = {
         nav: {
             dashboard: "Dashboard",
             content: "Contents",
-            analytics: "Analytics",
+            analytics: "Prediction",
             earn: "Earn",
             customization: "Customization"
         },
@@ -20,7 +20,7 @@ export const translations = {
         subtitles: {
             dashboard: "Manage your channel performance and strategy.",
             contents: "Manage and optimize your video library and metadata.",
-            analytics: "Leverage AI-driven predictions to forecast trends and strategically grow your channel."
+            analytics: "Forecast your channel's growth for the next 30 days with AI predictions."
         },
 
         // Time Ranges
@@ -39,13 +39,18 @@ export const translations = {
             engagement: "Engagement Rate"
         },
 
+        // ... existing keys ...
+
         // Dashboard Section
         sections: {
             growth: "Growth",
-            aiInsights: "AI Prediction Insights",
-            aiSubtitle: "Recommendations based on latest data",
+            performance: "Performance",
+            aiInsights: "AI Strategic Insights",
+            aiForecast: "Future Growth Strategy", // New key
+            aiSubtitle: "Strategic insights derived from growth predictions.",
             aiRec: "RECOMMENDATION",
-            detailedAnalytics: "Detailed Analytics",
+            detailedAnalytics: "30-Day Growth Forecast", // Renamed
+            predictionDisclaimer: "This is a prediction for the next 30 days based on current trends.", // New key
             topVideos: "Top Videos",
             noData: "No detailed trend data available for this period.",
             noDataSub: "Daily stats might be hidden by YouTube for privacy."
@@ -58,7 +63,13 @@ export const translations = {
             subscribers: "Subscribers",
             revenue: "Revenue",
             likes: "Likes",
-            dislikes: "Dislikes"
+            dislikes: "Dislikes",
+            engagement: "Engagement"
+        },
+        predictionModels: {
+            ma: "Simple Moving Average",
+            wma: "Weighted Moving Average (Default)",
+            xgboost: "XGBoost (AI)"
         },
         chartType: {
             changes: "Changes",
@@ -140,7 +151,7 @@ export const translations = {
         nav: {
             dashboard: "대시보드",
             content: "콘텐츠",
-            analytics: "분석",
+            analytics: "미래 예측",
             earn: "수익 창출",
             customization: "맞춤 설정"
         },
@@ -149,7 +160,7 @@ export const translations = {
         subtitles: {
             dashboard: "채널 성과 분석 및 전략 관리",
             contents: "동영상 라이브러리 및 메타데이터를 효율적으로 관리하세요.",
-            analytics: "AI 기반 예측을 활용하여 트렌드를 파악하고 채널을 전략적으로 성장시키세요."
+            analytics: "AI 예측을 통해 향후 30일간의 채널 성장을 미리 확인하세요."
         },
 
         // Time Ranges
@@ -171,10 +182,13 @@ export const translations = {
         // Dashboard Section
         sections: {
             growth: "성장 추이",
-            aiInsights: "AI 예측 인사이트",
-            aiSubtitle: "최신 데이터 기반 추천 전략",
+            performance: "채널 성과",
+            aiInsights: "AI 전략 분석",
+            aiForecast: "미래 성장 전략", // New key
+            aiSubtitle: "예측된 성장 데이터를 기반으로 분석된 전략입니다.",
             aiRec: "추천 전략",
-            detailedAnalytics: "상세 분석",
+            detailedAnalytics: "30일 성장 예측", // Renamed
+            predictionDisclaimer: "현재 트렌드 분석 데이터를 기반으로 한 30일 예측치입니다 (XGBoost 적용).", // New key
             topVideos: "인기 동영상",
             noData: "이 기간에 대한 상세 데이터가 없습니다.",
             noDataSub: "유튜브 개인정보 보호 정책으로 인해 일일 데이터가 숨겨졌을 수 있습니다."
@@ -187,7 +201,13 @@ export const translations = {
             subscribers: "구독자",
             revenue: "수익",
             likes: "좋아요",
-            dislikes: "싫어요"
+            dislikes: "싫어요",
+            engagement: "참여도"
+        },
+        predictionModels: {
+            ma: "단순 이동 평균 (Simple MA)",
+            wma: "가중 이동 평균 (Weighted MA - 기본값)",
+            xgboost: "XGBoost (AI 예측)"
         },
         chartType: {
             changes: "변화량",

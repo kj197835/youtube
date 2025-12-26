@@ -1,9 +1,11 @@
 google-api-python-client
 google-auth-oauthlib
 google-auth-httplib2
+requests
+python-dotenv
 pandas
 scikit-learn
-python-dotenv
+xgboost
 sqlalchemy
 scikit-learn
 sqlalchemy

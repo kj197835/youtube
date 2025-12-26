@@ -11,6 +11,7 @@ data/
 "AI 코딩 정보.txt"
 "AI 코딩 정보.txt"
 *.txt
+!requirements.txt
 auto_update.log
 
 # Database

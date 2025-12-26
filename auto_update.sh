@@ -13,14 +13,17 @@ echo "[$DATE] Starting daily update..." >> "$LOG_FILE"
 
 # Run Data Fetching & Analysis via Docker
 # We use 'run --rm' to clean up container after exit
-echo "[$DATE] Running YIAPS in Docker..." >> "$LOG_FILE"
-/usr/local/bin/docker-compose run --rm yiaps sh -c "python fetch_data.py" >> "$LOG_FILE" 2>&1
+echo "[$DATE]# 2. Run Data Fetching & AI Analysis" >> "$LOG_FILE"
+echo "[$DATE] Running Data Fetching & AI Analysis..." >> "$LOG_FILE"
+docker compose run --rm yiaps python fetch_data.py >> "$LOG_FILE" 2>&1
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then
-    echo "[$DATE] ERROR: Data update failed with exit code $EXIT_CODE. Aborting git push." >> "$LOG_FILE"
+    echo "[$DATE] ERROR: Data fetching failed with exit code $EXIT_CODE. Aborting git push." >> "$LOG_FILE"
     exit $EXIT_CODE
 fi
+
+
 
 echo "[$DATE] Data update successful. Proceeding to Build & Deploy..." >> "$LOG_FILE"
 # Build React Dashboard
@@ -33,7 +36,7 @@ cp -r dashboard/dist/* .
 
 # Git Sync
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
-git add -f data/*.csv dashboard_data.json database.py fetch_data.py auto_update.sh index.html assets/ thumbnails/ AI_SOUND_LAB1.png
+git add -f data/*.csv dashboard_data.json prediction_data.json database.py fetch_data.py prediction.py auto_update.sh index.html assets/ thumbnails/ AI_SOUND_LAB1.png
 git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
 git push origin main >> "$LOG_FILE" 2>&1
 

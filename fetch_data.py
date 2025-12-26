@@ -19,16 +19,14 @@ from database import (
     DemographicsAge, DemographicsGender, Geography, TrafficSource,
     CompetitorChannel, CompetitorVideo
 )
+import prediction # Import prediction engine
 
 # --- Constants ---
-# --- Constants ---
-DATE_FORMAT = "%Y-%m-%d"
 DATE_FORMAT = "%Y-%m-%d"
 # Use host.docker.internal for Mac/Windows Docker, or localhost if running natively
 OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://host.docker.internal:11434/api/generate")
 OLLAMA_MODEL = "llama3.1"
 
-# TODO: Add your competitor channel IDs here
 # TODO: Add your competitor channel IDs here
 # Example: UC..., UC...
 COMPETITOR_CHANNEL_IDS = [
@@ -460,6 +458,29 @@ def analyze_with_ollama(session, my_channel_id):
     channel = session.query(Channel).get(my_channel_id)
     my_name = channel.name if channel else "My Channel"
     
+    # --- Intergrate Prediction Engine ---
+    print("Generating Fresh Predictions (XGBoost/MA/WMA)...")
+    try:
+        prediction.generate_predictions() # This updates dashboard/public/prediction_data.json
+    except Exception as e:
+        print(f"Prediction Generation Failed: {e}")
+        
+    # Read Prediction Data
+    pred_summary = "No prediction data available."
+    try:
+        with open('dashboard/public/prediction_data.json', 'r') as f:
+            p_data = json.load(f)
+            # Extract XGBoost for Views
+            xgb_views = p_data.get('predictions', {}).get('xgboost', {}).get('view_count', [])
+            if xgb_views:
+                first_val = xgb_views[0]
+                last_val = xgb_views[-1]
+                growth_pct = ((last_val - first_val) / first_val * 100) if first_val > 0 else 0
+                pred_summary = f"XGBoost Forecast (30 Days): Views from {first_val} to {last_val} ({growth_pct:.1f}% Growth)."
+    except Exception as e:
+        print(f"Failed to read prediction data: {e}")
+    # ------------------------------------
+    
     # Last 30 days stats
     end_date = datetime.date.today()
     start_date = end_date - datetime.timedelta(days=30)
@@ -482,36 +503,54 @@ def analyze_with_ollama(session, my_channel_id):
     for c in competitors:
         comp_context.append(f"- {c.channel_name}: {c.subscribers} Subs, {c.total_views} Total Views")
         
-    comp_text = "\n".join(comp_context) if comp_context else "No competitor data available."
+    comp_text = "\\n".join(comp_context) if comp_context else "No competitor data available."
     
     # Improved Prompt
     prompt = f"""
-    Role: Professional YouTube Data Analyst.
-    Task: Analyze the channel performance and provide strategic advice in JSON format.
+    Role: Professional YouTube Growth Strategist & Data Analyst.
+    Task: specific analysis based on "future growth predictions" and current data.
     
     Target Channel: "{my_name}"
     - Performance (Last 30 Days): {my_views_30d} Views, {my_subs_30d} New Subs.
+    - Future Forecast (XGBoost): {pred_summary}
     
     Competitors/Market Context:
     {comp_text}
     
     Output Requirement:
-    Return a single valid JSON object with exactly these keys: "strengths", "improvements", "action_plan", "detailed_report".
-    1. "strengths", "improvements", "action_plan": Object with "title" (short, max 10 chars) and "content" (1-2 sentences).
-    2. "detailed_report": A comprehensive Markdown string in Korean.
-       - Include specific comparative analysis vs competitors.
-       - Include what works for them (e.g. Chillhop's seasonality).
-       - Actionable bullet points.
-       - Use headers (##), bolding (**), and lists (-).
+    Return a single valid JSON object with exactly these keys:
+    "current_analysis": {{ "strengths": {{ "title": "...", "content": "..." }}, "improvements": {{ "title": "...", "content": "..." }}, "action_plan": {{ "title": "...", "content": "..." }}, "detailed_report": "markdown..." }},
+    "future_strategy": {{ "growth_trend": {{ "title": "...", "content": "..." }}, "risk_factor": {{ "title": "...", "content": "..." }}, "action_strategy": {{ "title": "...", "content": "..." }}, "detailed_report": "markdown..." }}
+    
+    SECTION 1: "current_analysis" (Based on PAST 30 days data only)
+    - "strengths": What went well? (Views, Subs)
+    - "improvements": What needs sizing up?
+    - "action_plan": Immediate authorized actions.
+    - "detailed_report": Markdown report focusing on PAST performance.
+    
+    SECTION 2: "future_strategy" (Based on XGBOOST PREDICTION only)
+    - Prediction Context: {pred_summary}
+    - "growth_trend": Analyze the prediction (growth rate, direction).
+    - "risk_factor": Identify future risks based on prediction.
+    - "action_strategy": Future-oriented strategy.
+    - "detailed_report": Markdown report focusing on FUTURE predictions (3 Sections: Growth/Risk/Strategy).
     
     Language: Korean (한국어).
     
     JSON Example:
     {{
-      "strengths": {{ "title": "...", "content": "..." }},
-      "improvements": {{ "title": "...", "content": "..." }},
-      "action_plan": {{ "title": "...", "content": "..." }},
-      "detailed_report": "## 상세 분석\\n\\n..."
+      "current_analysis": {{
+        "strengths": {{ "title": "...", "content": "..." }},
+        "improvements": {{ "title": "...", "content": "..." }},
+        "action_plan": {{ "title": "...", "content": "..." }},
+        "detailed_report": "..."
+      }},
+      "future_strategy": {{
+        "growth_trend": {{ "title": "...", "content": "..." }},
+        "risk_factor": {{ "title": "...", "content": "..." }},
+        "action_strategy": {{ "title": "...", "content": "..." }},
+        "detailed_report": "..."
+      }}
     }}
     """
     
@@ -527,7 +566,6 @@ def analyze_with_ollama(session, my_channel_id):
             res_json = response.json()
             raw_text = res_json.get('response', '{}')
             # Parse the inner JSON string if necessary, Ollama 'json' format usually returns a JSON object in 'response' BUT sometimes it's text.
-            # With "format": "json", it tries to enforce structure.
             # With "format": "json", it tries to enforce structure.
             try:
                 return json.loads(raw_text)
@@ -680,10 +718,18 @@ def generate_frontend_json(session, channel_id):
     if not ai_insights:
         # Fallback/Default
         ai_insights = {
-            "strengths": {"title": "AI 분석 준비", "content": "경쟁 채널 데이터 수집 후 AI 분석이 시작됩니다."},
-            "improvements": {"title": "데이터 부족", "content": "충분한 비교 데이터가 모이면 활성화됩니다."},
-            "action_plan": {"title": "시스템 설정", "content": "경쟁 채널 ID를 설정하고 데이터를 수집하세요."},
-            "detailed_report": "# 분석 준비 중\n\n아직 충분한 데이터가 수집되지 않았습니다. 잠시 후 다시 시도해주세요."
+            "current_analysis": {
+                "strengths": {"title": "데이터 분석 중", "content": "현재 성과를 분석하고 있습니다."},
+                "improvements": {"title": "개선점 파악", "content": "데이터 부족으로 분석이 지연되고 있습니다."},
+                "action_plan": {"title": "행동 계획", "content": "잠시 후 다시 시도해주세요."},
+                "detailed_report": "# 분석 중..."
+            },
+            "future_strategy": {
+                "growth_trend": {"title": "예측 로딩 중", "content": "XGBoost 엔진이 가동 중입니다."},
+                "risk_factor": {"title": "리스크 탐지", "content": "미래 데이터를 계산하고 있습니다."},
+                "action_strategy": {"title": "전략 수립", "content": "잠시만 기다려주세요."},
+                "detailed_report": "# 예측 중..."
+            }
         }
 
     # Final Output
@@ -705,6 +751,7 @@ def generate_frontend_json(session, channel_id):
     public_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(config.DASHBOARD_DATA_FILE, public_path)
     print("Dashboard JSON Generated & Synced.")
+    
 
 # --- Main Logic ---
 
@@ -738,7 +785,6 @@ def main():
     ch.name = c_info['snippet']['title']
     ch.profil_image = c_info['snippet']['thumbnails']['default']['url']
     ch.last_updated = datetime.datetime.utcnow()
-    ch.last_updated = datetime.datetime.utcnow()
     session.commit()
 
     # 1.5 Fetch Competitors
@@ -760,7 +806,7 @@ def main():
     upsert_channel_stats(session, ch, res)
     session.commit()
     
-    # 4. Videos List (Fetch ALL if init, or maybe just check for new ones? Fetch ALL is safer)
+    # 4. Videos List
     videos = fetch_all_videos(youtube, cid)
     upsert_videos(session, cid, videos)
     session.commit()
@@ -768,15 +814,13 @@ def main():
     # 5. Video Daily Stats (Iterate)
     print(f"Syncing daily stats for {len(videos)} videos...")
     for i, v in enumerate(videos):
-        # Progress indicator
         if i % 10 == 0: print(f"Processing {i}/{len(videos)}: {v['title'][:20]}...")
         v_res = fetch_video_daily(analytics, v['id'], start_date, end_date)
         upsert_video_daily(session, v['id'], v_res)
-        if i % 20 == 0: session.commit() # Commit periodically
+        if i % 20 == 0: session.commit()
     session.commit()
     
     # 6. Demographics & Traffic
-    # Note: Demographics/Geo are now Aggregates. We store them using the end_date as the snapshot key.
     snapshot_date = datetime.datetime.strptime(end_date, DATE_FORMAT).date()
     
     # Age
@@ -786,7 +830,7 @@ def main():
     # Country
     upsert_geography(session, fetch_demographics_daily(analytics, start_date, end_date, "country"), snapshot_date)
     
-    # Traffic (Daily supported)
+    # Traffic
     upsert_traffic(session, fetch_traffic_daily(analytics, start_date, end_date))
     session.commit()
     
@@ -794,6 +838,6 @@ def main():
     
     # 7. Generate JSON
     generate_frontend_json(session, cid)
-    
+
 if __name__ == "__main__":
     main()

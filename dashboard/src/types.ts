@@ -54,16 +54,68 @@ export interface CommentData {
 export type AppTab = 'Dashboard' | 'Content' | 'Analytics' | 'Comments' | 'Earn' | 'Customization';
 
 // New types for Real Data
+//    estimatedMinutesWatched?: number[];
+export interface AIInsightItem {
+    title: string;
+    content: string;
+}
+
+export interface InsightItem {
+    title: string;
+    content: string;
+}
+
+export interface CurrentAnalysis {
+    strengths: InsightItem;
+    improvements: InsightItem;
+    action_plan: InsightItem;
+    detailed_report?: string;
+}
+
+export interface FutureStrategy {
+    growth_trend: InsightItem;
+    risk_factor: InsightItem;
+    action_strategy: InsightItem;
+    detailed_report?: string;
+}
+
+export interface AIInsights {
+    current_analysis: CurrentAnalysis;
+    future_strategy: FutureStrategy;
+}
+
+export interface PredictionData {
+    last_updated: string;
+    dates: string[];
+    predictions: {
+        ma: {
+            view_count: number[];
+            subscriber_count: number[];
+            revenue: number[];
+        };
+        wma: {
+            view_count: number[];
+            subscriber_count: number[];
+            revenue: number[];
+        };
+        xgboost: {
+            view_count: number[];
+            subscriber_count: number[];
+            revenue: number[];
+        };
+    };
+}
+
 export interface DashboardData {
     summary: {
-        channel_name?: string;
-        profile_image?: string;
+        channel_name: string;
+        profile_image: string;
         total_views_30d: number;
         estimated_revenue_30d: number;
         subs_gained_30d: number;
-        total_watch_time_hours_30d?: number;
-        likes_30d?: number; // Added
-        avg_engagement_rate_30d?: number;
+        total_watch_time_hours_30d: number;
+        likes_30d: number;
+        avg_engagement_rate_30d: number;
         last_updated: string;
     };
     trends: {
@@ -71,28 +123,27 @@ export interface DashboardData {
         weekly: TrendData;
         monthly: TrendData;
     };
-    top_videos: Array<{
-        video: string;
-        views: number;
-        estimatedMinutesWatched: number;
-        estimatedRevenue: number;
-        subscribersGained: number;
-    }>;
+    prediction: {
+        dates: string[];
+        views: number[];
+    };
+    ai_insights?: AIInsights;
+    top_videos: VideoData[];
     demographics: {
-        age_gender?: {
+        age_gender: {
             headers: string[];
-            rows: Array<[string, string, number]>;
+            rows: (string | number)[][];
         };
-        geography?: {
+        geography: {
             headers: string[];
-            rows: Array<[string, number, number]>;
+            rows: (string | number)[][];
         };
     };
-    traffic_sources?: Array<{
+    traffic_sources: {
         insightTrafficSourceType: string;
         views: number;
         estimatedMinutesWatched: number;
-    }>;
+    }[];
 }
 
 export interface TrendData {
