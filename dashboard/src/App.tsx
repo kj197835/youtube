@@ -281,12 +281,12 @@ const App: React.FC = () => {
                     <div className="space-y-6">
                         {/* Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            <StatsCard label={`${t.stats.views} ${rangeLabel}`} value={stats?.viewCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">👁️</span>} />
-                            <StatsCard label={`${t.stats.subscribers} ${rangeLabel}`} value={stats?.subscriberCount.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">👥</span>} />
-                            <StatsCard label={`Likes ${rangeLabel}`} value={stats?.likes.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">❤️</span>} />
-                            <StatsCard label={t.stats.watchTime} value={stats?.watchTimeHours.toLocaleString() || '-'} change="-" isPositive={false} icon={<span className="text-xl">⏱️</span>} />
+                            <StatsCard label={`${t.stats.views} ${rangeLabel}`} value={stats?.viewCount?.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">👁️</span>} />
+                            <StatsCard label={`${t.stats.subscribers} ${rangeLabel}`} value={stats?.subscriberCount?.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">👥</span>} />
+                            <StatsCard label={`Likes ${rangeLabel}`} value={stats?.likes?.toLocaleString() || '-'} change="-" isPositive={true} icon={<span className="text-xl">❤️</span>} />
+                            <StatsCard label={t.stats.watchTime} value={stats?.watchTimeHours?.toLocaleString() || '-'} change="-" isPositive={false} icon={<span className="text-xl">⏱️</span>} />
                             <StatsCard label={t.stats.engagement} value={`${stats?.avgEngagementRate}%`} change="-" isPositive={true} icon={<span className="text-xl">💬</span>} />
-                            <StatsCard label={`${t.stats.revenue} ${rangeLabel}`} value={`$${stats?.revenue.toFixed(2) || '0.00'}`} change="-" isPositive={true} icon={<span className="text-xl">💰</span>} />
+                            <StatsCard label={`${t.stats.revenue} ${rangeLabel}`} value={`$${stats?.revenue?.toFixed(2) || '0.00'}`} change="-" isPositive={true} icon={<span className="text-xl">💰</span>} />
                         </div>
 
                         {/* Charts Area */}
