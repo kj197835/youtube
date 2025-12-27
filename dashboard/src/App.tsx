@@ -611,7 +611,7 @@ const App: React.FC = () => {
                         )}
 
                         {/* Combined Chart */}
-                        <div className="bg-white p-4 sm:p-8 rounded-3xl border border-gray-100 shadow-sm min-h-0 sm:min-h-[500px]"></div>
+
                     </div>
                 );
             case 'Earn':

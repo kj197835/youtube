@@ -552,51 +552,35 @@ def analyze_with_ollama(session, my_channel_id):
         
     comp_text = "\\n".join(comp_context) if comp_context else "No competitor data available."
     
-    # Improved Prompt
+    # Improved Prompt (Korean Optimized)
     prompt = f"""
-    Role: Professional YouTube Growth Strategist & Data Analyst.
-    Task: specific analysis based on "future growth predictions" and current data.
-    
-    Target Channel: "{my_name}"
-    - Performance (Last 30 Days): {my_views_30d} Views, {my_subs_30d} New Subs.
-    - Future Forecast (XGBoost): {pred_summary}
-    
-    Competitors/Market Context:
+    당신은 유튜브 채널 성장 전략가이자 데이터 분석가입니다.
+    주어진 데이터와 예측 모델(XGBoost)의 결과를 바탕으로, 채널의 현재 상태를 진단하고 미래 성장을 위한 구체적인 전략을 제안하세요.
+    모든 응답은 반드시 '한국어(Korean)'로 작성해야 합니다.
+
+    [대상 채널 정보]
+    - 채널명: "{my_name}"
+    - 최근 30일 성과: 조회수 {my_views_30d}회, 신규 구독자 {my_subs_30d}명.
+    - 향후 30일 성장 예측 요약: {pred_summary}
+
+    [경쟁 채널 요약]
     {comp_text}
-    
-    Output Requirement:
-    Return a single valid JSON object with exactly these keys:
-    "current_analysis": {{ "strengths": {{ "title": "...", "content": "..." }}, "improvements": {{ "title": "...", "content": "..." }}, "action_plan": {{ "title": "...", "content": "..." }}, "detailed_report": "markdown..." }},
-    "future_strategy": {{ "growth_trend": {{ "title": "...", "content": "..." }}, "risk_factor": {{ "title": "...", "content": "..." }}, "action_strategy": {{ "title": "...", "content": "..." }}, "detailed_report": "markdown..." }}
-    
-    SECTION 1: "current_analysis" (Based on PAST 30 days data only)
-    - "strengths": What went well? (Views, Subs)
-    - "improvements": What needs sizing up?
-    - "action_plan": Immediate authorized actions.
-    - "detailed_report": Markdown report focusing on PAST performance.
-    
-    SECTION 2: "future_strategy" (Based on XGBOOST PREDICTION only)
-    - Prediction Context: {pred_summary}
-    - "growth_trend": Analyze the prediction (growth rate, direction).
-    - "risk_factor": Identify future risks based on prediction.
-    - "action_strategy": Future-oriented strategy.
-    - "detailed_report": Markdown report focusing on FUTURE predictions (3 Sections: Growth/Risk/Strategy).
-    
-    Language: Korean (한국어).
-    
-    JSON Example:
+
+    [출력 요구사항]
+    아래의 JSON 형식을 정확히 준수하여 응답하세요. 마크다운이 아닌 순수 JSON 객체여야 합니다.
+
     {{
       "current_analysis": {{
-        "strengths": {{ "title": "...", "content": "..." }},
-        "improvements": {{ "title": "...", "content": "..." }},
-        "action_plan": {{ "title": "...", "content": "..." }},
-        "detailed_report": "..."
+        "strengths": {{ "title": "핵심 강점", "content": "30일간의 성과 중 긍정적인 부분 요약" }},
+        "improvements": {{ "title": "개선 필요", "content": "아쉬운 점 및 보완할 부분" }},
+        "action_plan": {{ "title": "즉시 실행 전략", "content": "당장 적용 가능한 구체적 행동 지침" }},
+        "detailed_report": "## 현재 성과 분석\\n\\n여기에 마크다운 형식으로 30일 성과를 상세히 분석한 내용을 작성하세요."
       }},
       "future_strategy": {{
-        "growth_trend": {{ "title": "...", "content": "..." }},
-        "risk_factor": {{ "title": "...", "content": "..." }},
-        "action_strategy": {{ "title": "...", "content": "..." }},
-        "detailed_report": "..."
+        "growth_trend": {{ "title": "성장 트렌드 예측", "content": "예측된 데이터의 흐름과 의미 해석" }},
+        "risk_factor": {{ "title": "잠재적 리스크", "content": "성장 과정에서 주의해야 할 위험 요소" }},
+        "action_strategy": {{ "title": "미래 대응 전략", "content": "예측에 따른 장기적인 콘텐츠/운영 전략" }},
+        "detailed_report": "## 미래 성장 전략\\n\\n여기에 마크다운 형식으로 예측 데이터에 기반한 장기 전략 보고서를 작성하세요."
       }}
     }}
     """
