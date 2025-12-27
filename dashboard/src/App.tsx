@@ -390,20 +390,22 @@ const App: React.FC = () => {
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-50 flex items-center justify-between">
                             <h3 className="font-bold text-lg text-gray-900">{t.sections.topVideos}</h3>
-                            <div className="relative inline-block text-left">
-                                <select
-                                    value={videoLimit}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        setVideoLimit(val === 'ALL' ? 'ALL' : Number(val));
-                                    }}
-                                    className="block w-full pl-3 pr-8 py-2 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg shadow-sm appearance-none cursor-pointer"
-                                >
-                                    <option value={10}>10</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                    <option value="ALL">{t.videoLimit.all}</option>
-                                </select>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-400 font-medium">Show:</span>
+                                <div className="flex bg-gray-100 rounded-lg p-1">
+                                    {[10, 50, 100, 'ALL'].map((limit) => (
+                                        <button
+                                            key={limit}
+                                            onClick={() => setVideoLimit(limit as any)}
+                                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${videoLimit === limit
+                                                ? 'bg-white text-gray-900 shadow-sm'
+                                                : 'text-gray-400 hover:text-gray-600'
+                                                }`}
+                                        >
+                                            {limit}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <div className="overflow-x-auto">
