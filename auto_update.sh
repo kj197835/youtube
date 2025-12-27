@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Set PATH for Cron execution
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 # Configuration
 PROJECT_DIR="/Users/a1234/Desktop/ai-server/YouTube"
 LOG_FILE="$PROJECT_DIR/auto_update.log"
