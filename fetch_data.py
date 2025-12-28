@@ -568,18 +568,19 @@ def analyze_with_ollama(session, my_channel_id):
 
     [출력 요구사항]
     아래의 JSON 형식을 정확히 준수하여 응답하세요. 마크다운이 아닌 순수 JSON 객체여야 합니다.
+    **중요: 'title'과 'content' 필드는 절대로 비워두지 마십시오. 반드시 내용을 작성해야 합니다.**
 
     {{
       "current_analysis": {{
-        "strengths": {{ "title": "핵심 강점", "content": "30일간의 성과 중 긍정적인 부분 요약" }},
-        "improvements": {{ "title": "개선 필요", "content": "아쉬운 점 및 보완할 부분" }},
-        "action_plan": {{ "title": "즉시 실행 전략", "content": "당장 적용 가능한 구체적 행동 지침" }},
+        "strengths": {{ "title": "핵심 강점 (15자 내외)", "content": "30일간의 성과 중 긍정적인 부분 요약 (1~2문장)" }},
+        "improvements": {{ "title": "개선 필요 (15자 내외)", "content": "아쉬운 점 및 보완할 부분 (1~2문장)" }},
+        "action_plan": {{ "title": "즉시 실행 전략 (15자 내외)", "content": "당장 적용 가능한 구체적 행동 지침 (1~2문장)" }},
         "detailed_report": "## 현재 성과 분석\\n\\n여기에 마크다운 형식으로 30일 성과를 상세히 분석한 내용을 작성하세요."
       }},
       "future_strategy": {{
-        "growth_trend": {{ "title": "성장 트렌드 예측", "content": "예측된 데이터의 흐름과 의미 해석" }},
-        "risk_factor": {{ "title": "잠재적 리스크", "content": "성장 과정에서 주의해야 할 위험 요소" }},
-        "action_strategy": {{ "title": "미래 대응 전략", "content": "예측에 따른 장기적인 콘텐츠/운영 전략" }},
+        "growth_trend": {{ "title": "성장 트렌드 예측 (15자 내외)", "content": "예측된 데이터의 흐름과 의미 해석 (1~2문장)" }},
+        "risk_factor": {{ "title": "잠재적 리스크 (15자 내외)", "content": "성장 과정에서 주의해야 할 위험 요소 (1~2문장)" }},
+        "action_strategy": {{ "title": "미래 대응 전략 (15자 내외)", "content": "예측에 따른 장기적인 콘텐츠/운영 전략 (1~2문장)" }},
         "detailed_report": "## 미래 성장 전략\\n\\n여기에 마크다운 형식으로 예측 데이터에 기반한 장기 전략 보고서를 작성하세요."
       }}
     }}
@@ -596,10 +597,30 @@ def analyze_with_ollama(session, my_channel_id):
         if response.status_code == 200:
             res_json = response.json()
             raw_text = res_json.get('response', '{}')
-            # Parse the inner JSON string if necessary, Ollama 'json' format usually returns a JSON object in 'response' BUT sometimes it's text.
-            # With "format": "json", it tries to enforce structure.
+            
             try:
-                return json.loads(raw_text)
+                ai_data = json.loads(raw_text)
+                
+                # --- Fallback Logic for Empty Fields ---
+                def ensure_content(section, key, default_title, default_content):
+                    if not section.get(key): section[key] = {}
+                    if not section[key].get('title'): section[key]['title'] = default_title
+                    if not section[key].get('content'): section[key]['content'] = default_content
+
+                if 'current_analysis' in ai_data:
+                    c = ai_data['current_analysis']
+                    ensure_content(c, 'strengths', "성장 잠재력 확인", "초기 단계이지만 긍정적인 신호가 보입니다.")
+                    ensure_content(c, 'improvements', "콘텐츠 보완 필요", "지속적인 업로드와 품질 개선이 필요합니다.")
+                    ensure_content(c, 'action_plan', "꾸준한 활동", "정기적인 영상 업로드와 소통을 시작하세요.")
+                
+                if 'future_strategy' in ai_data:
+                    f = ai_data['future_strategy']
+                    ensure_content(f, 'growth_trend', "데이터 수집 중", "더 많은 데이터가 쌓이면 정확한 예측이 가능합니다.")
+                    ensure_content(f, 'risk_factor', "초기 이탈 주의", "구독자 유지를 위한 흥미로운 훅(Hook)이 필요합니다.")
+                    ensure_content(f, 'action_strategy', "기반 다지기", "채널의 정체성을 확립하고 아카이브를 구축하세요.")
+                # ---------------------------------------
+                
+                return ai_data
             except:
                 print("Failed to parse AI JSON response.")
                 return None
