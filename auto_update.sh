@@ -11,7 +11,7 @@ DATE=$(date "+%Y-%m-%d %H:%M:%S")
 cd "$PROJECT_DIR" || exit
 
 # Log start
-echo "[$DATE] Starting daily update..." >> "$LOG_FILE"
+echo "[$DATE] Starting weekly update..." >> "$LOG_FILE"
 
 # Run Data Fetching & Analysis via Docker
 # We use 'run --rm' to clean up container after exit
@@ -39,7 +39,7 @@ cp -r dashboard/dist/* .
 # Git Sync
 echo "[$DATE] Syncing with GitHub..." >> "$LOG_FILE"
 git add -f data/*.csv dashboard_data.json prediction_data.json database.py fetch_data.py prediction.py auto_update.sh index.html assets/ thumbnails/ AI_SOUND_LAB1.png
-git commit -m "Daily Update: $DATE" >> "$LOG_FILE" 2>&1
+git commit -m "Weekly Update: $DATE" >> "$LOG_FILE" 2>&1
 git push origin main >> "$LOG_FILE" 2>&1
 
 echo "[$DATE] Update completed." >> "$LOG_FILE"
